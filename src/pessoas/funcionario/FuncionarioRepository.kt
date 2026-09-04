@@ -1,4 +1,6 @@
 package pessoas.funcionario
 
-class FuncionarioRepository {
+import database.DbConnection
+
+class FuncionarioRepository(val dbConnection: DbConnection) {
 }

@@ -1,4 +1,7 @@
-package enums
+package model
 
-class TipoPessoa {
+enum class TipoPessoa {
+    FUNCIONARIO,
+    FORNECEDOR,
+    CLIENTE
 }

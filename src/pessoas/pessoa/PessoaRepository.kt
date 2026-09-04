@@ -1,23 +1,22 @@
-package pessoa
+package pessoas.pessoa
 
-import config.DbConnection
+import database.DbConnection
+import enums.Setor
 import model.Cliente
 import model.Fornecedor
 import model.Funcionario
 import model.Pessoa
-import model.Setor
 import model.TipoPessoa
 import java.sql.PreparedStatement
 import java.sql.ResultSet
 
-class PessoaRepository {
+class PessoaRepository(val dbConnection: DbConnection) {
 
     private fun mapearPessoa(rs: ResultSet): Pessoa {
         val id = rs.getInt("id")
         val nome = rs.getString("nome")
         val documento = rs.getString("cpf_cnpj")
         val telefone = rs.getString("telefone")
-        val email = rs.getString("email")
         val tipo = rs.getString("tipo")
         val ativo = rs.getBoolean("ativo")
 
@@ -29,7 +28,6 @@ class PessoaRepository {
                     nomeFuncionario = nome,
                     documentoFuncionario = documento,
                     telefoneFuncionario = telefone,
-                    emailFuncionario = email,
                     setor = Setor.valueOf(setor)
                 )
             }
@@ -38,14 +36,12 @@ class PessoaRepository {
                 nomeFornecedor = nome,
                 documentoFornecedor = documento,
                 telefoneFornecedor = telefone,
-                emailFornecedor = email
             )
             TipoPessoa.CLIENTE -> Cliente(
                 idCliente = id,
                 nomeCliente = nome,
                 documentoCliente = documento,
                 telefoneCliente = telefone,
-                emailCliente = email
             )
         }
     }
@@ -55,15 +51,14 @@ class PessoaRepository {
             conn.autoCommit = false
 
             val sqlPessoa = """
-                INSERT INTO PESSOA (nome, cpf_cnpj, telefone, email, tipo, ativo)
-                VALUES (?, ?, ?, ?, ?, ?)
+                INSERT INTO PESSOA (nome, cpf_cnpj, telefone, tipo, ativo)
+                VALUES (?, ?, ?, ?, ?)
             """.trimIndent()
 
             conn.prepareStatement(sqlPessoa, PreparedStatement.RETURN_GENERATED_KEYS).use { stmt ->
                 stmt.setString(1, pessoa.nome)
                 stmt.setString(2, pessoa.documento)
                 stmt.setString(3, pessoa.telefone)
-                stmt.setString(4, pessoa.email)
                 stmt.setString(5, pessoa.tipo.name)
                 stmt.setBoolean(6, pessoa.ativo)
                 stmt.executeUpdate()
@@ -114,7 +109,6 @@ class PessoaRepository {
             LEFT JOIN FUNCIONARIO f ON f.pessoa_id = p.id
             LEFT JOIN CLIENTE c ON c.pessoa_id = p.id
             LEFT JOIN FORNECEDOR fn ON fn.pessoa_id = p.id
-            WHERE p.ativo = TRUE
         """.trimIndent()
 
         DbConnection.conectar().use { conn ->
@@ -146,6 +140,28 @@ class PessoaRepository {
                 return if (rs.next()) mapearPessoa(rs) else null
             }
         }
+    }
+    fun listarAtivos(): List<Pessoa> {
+        val pessoasAtivas = mutableListOf<Pessoa>()
+        val sql = """
+            SELECT p.*, f.setor, c.limite_credito, fn.razao_social
+            FROM PESSOA p
+            LEFT JOIN FUNCIONARIO f ON f.pessoa_id = p.id
+            LEFT JOIN CLIENTE c ON c.pessoa_id = p.id
+            LEFT JOIN FORNECEDOR fn ON fn.pessoa_id = p.id
+            WHERE p.ativo = TRUE
+        """.trimIndent()
+
+        DbConnection.conectar().use { conn ->
+            conn.prepareStatement(sql).use { stmt ->
+                val rs = stmt.executeQuery()
+                while (rs.next()) {
+                    pessoasAtivas.add(mapearPessoa(rs))
+                }
+            }
+        }
+
+        return pessoasAtivas
     }
 
     fun inativar(id: Int): Boolean {

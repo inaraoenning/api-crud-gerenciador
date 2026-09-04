@@ -1,4 +1,5 @@
 package enums
 
-class Formato {
+enum class Formato {
+    Redondo, Quadrado, Estreito, Conico
 }

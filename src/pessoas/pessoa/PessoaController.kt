@@ -1,4 +1,8 @@
-package pessoa
+package pessoas.pessoa
+
+import enums.Setor
+import lerInteiroSeguro
+import model.Funcionario
 
 class PessoaController(private val repositorio: PessoaRepository) {
 
@@ -25,20 +29,18 @@ class PessoaController(private val repositorio: PessoaRepository) {
         }
     }
 
-    private fun cadastrarFuncionario() {
+    private fun cadastrarPessoa() {
         print("Nome: ")
         val nome = readln()
         print("Documento: ")
         val documento = readln()
         print("Telefone: ")
         val telefone = readln()
-        print("Email: ")
-        val email = readln()
         println("Setor: 1-Financeiro 2-Comercial 3-Manutencao")
         val setor = when (readln()) {
-            "1" -> Setor.FINANCEIRO
-            "2" -> Setor.COMERCIAL
-            "3" -> Setor.MANUTENCAO
+            "1" -> Setor.entries.equals("FINANCEIRO")
+            "2" -> Setor.entries.equals("COMERCIAL")
+            "3" -> Setor.entries.equals("MANUTENCAO")
             else -> {
                 println("Setor invalido.")
                 return
@@ -51,8 +53,8 @@ class PessoaController(private val repositorio: PessoaRepository) {
         }
 
         val id = repositorio.listar().size + 1
-        val funcionario = Funcionario(id, nome, documento, telefone, email, setor)
-        repositorio.adicionar(funcionario)
+        val funcionario = Funcionario(id, nome, documento, telefone, setor)
+       // repositorio.adicionar(funcionario)
         println("Funcionario cadastrado com sucesso!")
     }
 

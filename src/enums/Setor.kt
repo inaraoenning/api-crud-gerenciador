@@ -1,4 +1,7 @@
 package enums
 
-class Setor {
+enum class Setor {
+    FINANCEIRO,
+    COMERCIAL,
+    MANUTENCAO
 }
