@@ -1,50 +1,77 @@
 package pessoas.funcionario
 
 import enums.Setor
-import lerInteiroSeguro
+import lerDoubleSeguro
 import model.Funcionario
 import pessoas.pessoa.PessoaRepository
+import pessoas.pessoa.lerDadosComunsPessoa
 
 class FuncionarioController(private val repositorio: PessoaRepository) {
 
-    private fun cadastrarFuncionario() {
-        print("Nome: ")
-        val nome = readln()
-        print("Documento: ")
-        val documento = readln()
-        print("Telefone: ")
-        val telefone = readln()
-        println("Setor: 1-Financeiro 2-Comercial 3-Manutencao")
-        val setor = when (readln()) {
-            "1" -> Setor.entries.equals("FINANCEIRO")
-            "2" -> Setor.entries.equals("COMERCIAL")
-            "3" -> Setor.entries.equals("MANUTENCAO")
-            else -> {
-                println("Setor invalido.")
-                return
+    fun executar() {
+        while (true) {
+            println("--- Gerenciamento de Funcionarios ---")
+            println("1 - Cadastrar Funcionario")
+            println("2 - Listar Funcionarios")
+            println("3 - Inativar Funcionario")
+            println("0 - Voltar")
+            print("Opcao: ")
+
+            when (readln()) {
+                "1" -> cadastrarFuncionario()
+                "2" -> listar()
+                "3" -> inativar()
+                "0" -> break
+                else -> println("Opcao invalida.")
             }
         }
+    }
 
-        if (!Validador.documentoValido(documento)) {
-            println("Documento invalido.")
-            return
-        }
+    private fun cadastrarFuncionario() {
+        val dados = lerDadosComunsPessoa() ?: return
 
-        val id = repositorio.listar().size + 1
-        val funcionario = Funcionario(id, nome, documento, telefone, setor)
-        // repositorio.adicionar(funcionario)
-        println("Funcionario cadastrado com sucesso!")
+        println("Setor: 1-Financeiro 2-Comercial 3-Manutencao")
+        val setor =
+            when (readln()) {
+                "1" -> Setor.FINANCEIRO
+                "2" -> Setor.COMERCIAL
+                "3" -> Setor.MANUTENCAO
+                else -> {
+                    println("Setor invalido.")
+                    return
+                }
+            }
+
+        val salario = lerDoubleSeguro("Salario") ?: return
+
+        val funcionario =
+            Funcionario(
+                idFuncionario = 0,
+                nomeFuncionario = dados.nome,
+                documentoFuncionario = dados.documento,
+                telefoneFuncionario = dados.telefone,
+                salario = java.math.BigDecimal.valueOf(salario),
+                setor = setor,
+            )
+
+        val ok = repositorio.inserir(funcionario, salario = salario, setor = setor.name)
+        println(if (ok) "Funcionario cadastrado com sucesso!" else "Erro ao cadastrar funcionario.")
     }
 
     private fun listar() {
-        repositorio.listarAtivos().forEach {
-            println("${it.id} -${it.nome} [${it.tipo}]")
+        repositorio.listarAtivos().filterIsInstance<Funcionario>().forEach {
+            println("${it.id} - ${it.nome} | Setor: ${it.setor} | Salario: R$ ${it.salario}")
         }
     }
 
     private fun inativar() {
-        val id = lerInteiroSeguro("ID da pessoa") ?: return
+        print("ID do funcionario: ")
+        val id = readln().toIntOrNull()
+        if (id == null) {
+            println("ID invalido.")
+            return
+        }
         val ok = repositorio.inativar(id)
-        println(if (ok) "Inativado." else "Pessoa nao encontrada.")
+        println(if (ok) "Funcionario inativado." else "Funcionario nao encontrado.")
     }
 }

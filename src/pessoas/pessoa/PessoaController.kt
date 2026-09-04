@@ -1,26 +1,27 @@
 package pessoas.pessoa
 
-import enums.Setor
 import lerInteiroSeguro
-import model.Funcionario
+import pessoas.cliente.ClienteController
+import pessoas.fornecedor.FornecedorController
+import pessoas.funcionario.FuncionarioController
 
 class PessoaController(private val repositorio: PessoaRepository) {
 
     fun executar() {
         while (true) {
             println("--- Gerenciamento de Pessoas ---")
-            println("1 - Cadastrar Funcionario")
-            println("2 - Cadastrar Fornecedor")
-            println("3 - Cadastrar Cliente")
-            println("4 - Listar Pessoas")
+            println("1 - Funcionarios")
+            println("2 - Fornecedores")
+            println("3 - Clientes")
+            println("4 - Listar Todas as Pessoas")
             println("5 - Inativar Pessoa")
             println("0 - Voltar")
             print("Opcao: ")
 
             when (readln()) {
-                "1" -> cadastrarFuncionario()
-                "2" -> cadastrarFornecedor()
-                "3" -> cadastrarCliente()
+                "1" -> FuncionarioController(repositorio).executar()
+                "2" -> FornecedorController(repositorio).executar()
+                "3" -> ClienteController(repositorio).executar()
                 "4" -> listar()
                 "5" -> inativar()
                 "0" -> break
@@ -29,44 +30,18 @@ class PessoaController(private val repositorio: PessoaRepository) {
         }
     }
 
-    private fun cadastrarPessoa() {
-        print("Nome: ")
-        val nome = readln()
-        print("Documento: ")
-        val documento = readln()
-        print("Telefone: ")
-        val telefone = readln()
-        println("Setor: 1-Financeiro 2-Comercial 3-Manutencao")
-        val setor = when (readln()) {
-            "1" -> Setor.entries.equals("FINANCEIRO")
-            "2" -> Setor.entries.equals("COMERCIAL")
-            "3" -> Setor.entries.equals("MANUTENCAO")
-            else -> {
-                println("Setor invalido.")
-                return
-            }
-        }
-
-        if (!Validador.documentoValido(documento)) {
-            println("Documento invalido.")
+    private fun listar() {
+        val pessoas = repositorio.listarAtivos()
+        if (pessoas.isEmpty()) {
+            println("Nenhuma pessoa cadastrada.")
             return
         }
-
-        val id = repositorio.listar().size + 1
-        val funcionario = Funcionario(id, nome, documento, telefone, setor)
-       // repositorio.adicionar(funcionario)
-        println("Funcionario cadastrado com sucesso!")
-    }
-
-    private fun listar() {
-        repositorio.listarAtivos().forEach {
-            println("${it.id} -${it.nome} [${it.tipo}]")
-        }
+        pessoas.forEach { println("${it.id} - ${it.nome} [${it.tipo}]") }
     }
 
     private fun inativar() {
         val id = lerInteiroSeguro("ID da pessoa") ?: return
         val ok = repositorio.inativar(id)
-        println(if (ok) "Inativado." else "Pessoa nao encontrada.")
+        println(if (ok) "Pessoa inativada." else "Pessoa nao encontrada.")
     }
 }

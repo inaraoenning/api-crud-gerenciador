@@ -2,15 +2,27 @@ package pessoas.pessoa
 
 import database.DbConnection
 import enums.Setor
+import java.math.BigDecimal
+import java.sql.PreparedStatement
+import java.sql.ResultSet
 import model.Cliente
 import model.Fornecedor
 import model.Funcionario
 import model.Pessoa
 import model.TipoPessoa
-import java.sql.PreparedStatement
-import java.sql.ResultSet
 
-class PessoaRepository(val dbConnection: DbConnection) {
+class PessoaRepository private constructor(val dbConnection: DbConnection) {
+
+    companion object {
+        @Volatile private var instancia: PessoaRepository? = null
+
+        fun getInstancia(): PessoaRepository {
+            return instancia
+                ?: synchronized(this) {
+                    instancia ?: PessoaRepository(DbConnection).also { instancia = it }
+                }
+        }
+    }
 
     private fun mapearPessoa(rs: ResultSet): Pessoa {
         val id = rs.getInt("id")
@@ -23,44 +35,56 @@ class PessoaRepository(val dbConnection: DbConnection) {
         return when (TipoPessoa.valueOf(tipo)) {
             TipoPessoa.FUNCIONARIO -> {
                 val setor = rs.getString("setor") ?: Setor.FINANCEIRO.name
+                val salario = rs.getBigDecimal("salario") ?: BigDecimal.ZERO
                 Funcionario(
                     idFuncionario = id,
                     nomeFuncionario = nome,
                     documentoFuncionario = documento,
                     telefoneFuncionario = telefone,
-                    setor = Setor.valueOf(setor)
+                    setor = Setor.valueOf(setor),
+                    salario = salario,
                 )
             }
-            TipoPessoa.FORNECEDOR -> Fornecedor(
-                idFornecedor = id,
-                nomeFornecedor = nome,
-                documentoFornecedor = documento,
-                telefoneFornecedor = telefone,
-            )
-            TipoPessoa.CLIENTE -> Cliente(
-                idCliente = id,
-                nomeCliente = nome,
-                documentoCliente = documento,
-                telefoneCliente = telefone,
-            )
+            TipoPessoa.FORNECEDOR ->
+                Fornecedor(
+                    idFornecedor = id,
+                    nomeFornecedor = nome,
+                    documentoFornecedor = documento,
+                    telefoneFornecedor = telefone,
+                )
+            TipoPessoa.CLIENTE ->
+                Cliente(
+                    idCliente = id,
+                    nomeCliente = nome,
+                    documentoCliente = documento,
+                    telefoneCliente = telefone,
+                )
         }
     }
 
-    fun inserir(pessoa: Pessoa, salario: Double = 0.0, setor: String? = null, limiteCredito: Double = 0.0, razaoSocial: String? = null): Boolean {
+    fun inserir(
+        pessoa: Pessoa,
+        salario: Double = 0.0,
+        setor: String? = null,
+        limiteCredito: Double = 0.0,
+        razaoSocial: String? = null,
+    ): Boolean {
         DbConnection.conectar().use { conn ->
             conn.autoCommit = false
 
-            val sqlPessoa = """
+            val sqlPessoa =
+                """
                 INSERT INTO PESSOA (nome, cpf_cnpj, telefone, tipo, ativo)
                 VALUES (?, ?, ?, ?, ?)
-            """.trimIndent()
+                """
+                    .trimIndent()
 
             conn.prepareStatement(sqlPessoa, PreparedStatement.RETURN_GENERATED_KEYS).use { stmt ->
                 stmt.setString(1, pessoa.nome)
                 stmt.setString(2, pessoa.documento)
                 stmt.setString(3, pessoa.telefone)
-                stmt.setString(5, pessoa.tipo.name)
-                stmt.setBoolean(6, pessoa.ativo)
+                stmt.setString(4, pessoa.tipo.name)
+                stmt.setBoolean(5, pessoa.ativo)
                 stmt.executeUpdate()
 
                 val rs = stmt.generatedKeys
@@ -69,7 +93,8 @@ class PessoaRepository(val dbConnection: DbConnection) {
 
                 when (pessoa.tipo) {
                     TipoPessoa.FUNCIONARIO -> {
-                        val sql = "INSERT INTO FUNCIONARIO (pessoa_id, salario, setor) VALUES (?, ?, ?)"
+                        val sql =
+                            "INSERT INTO FUNCIONARIO (pessoa_id, salario, setor) VALUES (?, ?, ?)"
                         conn.prepareStatement(sql).use {
                             it.setInt(1, pessoaId)
                             it.setDouble(2, salario)
@@ -103,13 +128,15 @@ class PessoaRepository(val dbConnection: DbConnection) {
 
     fun listar(): List<Pessoa> {
         val pessoas = mutableListOf<Pessoa>()
-        val sql = """
-            SELECT p.*, f.setor, c.limite_credito, fn.razao_social
+        val sql =
+            """
+            SELECT p.*, f.setor, f.salario, c.limite_credito, fn.razao_social
             FROM PESSOA p
             LEFT JOIN FUNCIONARIO f ON f.pessoa_id = p.id
             LEFT JOIN CLIENTE c ON c.pessoa_id = p.id
             LEFT JOIN FORNECEDOR fn ON fn.pessoa_id = p.id
-        """.trimIndent()
+            """
+                .trimIndent()
 
         DbConnection.conectar().use { conn ->
             conn.prepareStatement(sql).use { stmt ->
@@ -124,14 +151,16 @@ class PessoaRepository(val dbConnection: DbConnection) {
     }
 
     fun buscarPorId(id: Int): Pessoa? {
-        val sql = """
-            SELECT p.*, f.setor, c.limite_credito, fn.razao_social
+        val sql =
+            """
+            SELECT p.*, f.setor, f.salario, c.limite_credito, fn.razao_social
             FROM PESSOA p
             LEFT JOIN FUNCIONARIO f ON f.pessoa_id = p.id
             LEFT JOIN CLIENTE c ON c.pessoa_id = p.id
             LEFT JOIN FORNECEDOR fn ON fn.pessoa_id = p.id
             WHERE p.id = ?
-        """.trimIndent()
+            """
+                .trimIndent()
 
         DbConnection.conectar().use { conn ->
             conn.prepareStatement(sql).use { stmt ->
@@ -141,16 +170,19 @@ class PessoaRepository(val dbConnection: DbConnection) {
             }
         }
     }
+
     fun listarAtivos(): List<Pessoa> {
         val pessoasAtivas = mutableListOf<Pessoa>()
-        val sql = """
-            SELECT p.*, f.setor, c.limite_credito, fn.razao_social
+        val sql =
+            """
+            SELECT p.*, f.setor, f.salario, c.limite_credito, fn.razao_social
             FROM PESSOA p
             LEFT JOIN FUNCIONARIO f ON f.pessoa_id = p.id
             LEFT JOIN CLIENTE c ON c.pessoa_id = p.id
             LEFT JOIN FORNECEDOR fn ON fn.pessoa_id = p.id
             WHERE p.ativo = TRUE
-        """.trimIndent()
+            """
+                .trimIndent()
 
         DbConnection.conectar().use { conn ->
             conn.prepareStatement(sql).use { stmt ->
