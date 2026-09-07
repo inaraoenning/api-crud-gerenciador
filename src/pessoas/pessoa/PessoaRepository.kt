@@ -32,6 +32,7 @@ class PessoaRepository private constructor(val dbConnection: DbConnection) {
         val tipo = rs.getString("tipo")
         val ativo = rs.getBoolean("ativo")
 
+        // Cria o objeto especifico de cada tipo, passando o ativo corretamente.
         return when (TipoPessoa.valueOf(tipo)) {
             TipoPessoa.FUNCIONARIO -> {
                 val setor = rs.getString("setor") ?: Setor.FINANCEIRO.name
@@ -43,7 +44,7 @@ class PessoaRepository private constructor(val dbConnection: DbConnection) {
                     telefoneFuncionario = telefone,
                     setor = Setor.valueOf(setor),
                     salario = salario,
-                )
+                ).apply { this.ativo = ativo }
             }
             TipoPessoa.FORNECEDOR ->
                 Fornecedor(
@@ -51,14 +52,27 @@ class PessoaRepository private constructor(val dbConnection: DbConnection) {
                     nomeFornecedor = nome,
                     documentoFornecedor = documento,
                     telefoneFornecedor = telefone,
-                )
+                ).apply { this.ativo = ativo }
             TipoPessoa.CLIENTE ->
                 Cliente(
                     idCliente = id,
                     nomeCliente = nome,
                     documentoCliente = documento,
                     telefoneCliente = telefone,
-                )
+                ).apply { this.ativo = ativo }
+        }
+    }
+
+    // Verifica se ja existe uma pessoa com o mesmo CPF/CNPJ no banco.
+    // Usada para evitar documentos duplicados no cadastro.
+    private fun documentoJaExiste(documento: String): Boolean {
+        val sql = "SELECT 1 FROM PESSOA WHERE cpf_cnpj = ?"
+        DbConnection.conectar().use { conn ->
+            conn.prepareStatement(sql).use { stmt ->
+                stmt.setString(1, documento)
+                val rs = stmt.executeQuery()
+                return rs.next()
+            }
         }
     }
 
@@ -69,6 +83,12 @@ class PessoaRepository private constructor(val dbConnection: DbConnection) {
         limiteCredito: Double = 0.0,
         razaoSocial: String? = null,
     ): Boolean {
+        // Verifica se o CPF/CNPJ ja existe no banco antes de cadastrar.
+        if (documentoJaExiste(pessoa.documento)) {
+            println("Erro: ja existe uma pessoa cadastrada com o documento ${pessoa.documento}.")
+            return false
+        }
+
         DbConnection.conectar().use { conn ->
             conn.autoCommit = false
 

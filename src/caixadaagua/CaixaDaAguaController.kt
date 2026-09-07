@@ -1,0 +1,218 @@
+package caixadaagua
+
+import enums.Formato
+import enums.Material
+import lerDoubleSeguro
+import lerInteiroSeguro
+import model.CaixaDagua
+
+// Controller responsavel por exibir os menus e conversar com o usuario
+// no modulo de Caixa d'Agua (estoque de produtos).
+class CaixaDaAguaController {
+
+    fun executar() {
+        while (true) {
+            println("\n--- Gerenciamento de Caixas d'Agua ---")
+            println("1 - Visualizar Estoque")
+            println("2 - Adicionar Caixa")
+            println("3 - Editar Caixa")
+            println("4 - Deletar Caixa")
+            println("0 - Voltar")
+            print("Opcao: ")
+
+            when (readln()) {
+                "1" -> visualizarEstoque()
+                "2" -> adicionarCaixa()
+                "3" -> editarCaixa()
+                "4" -> deletarCaixa()
+                "0" -> break
+                else -> println("Opcao invalida.")
+            }
+        }
+    }
+
+    // Mostra todas as caixas d'agua cadastradas no banco.
+    private fun visualizarEstoque() {
+        val caixas = CaixaDaAguaRepository.listar()
+        if (caixas.isEmpty()) {
+            println("Estoque vazio.")
+            return
+        }
+
+        caixas.forEach {
+            println(
+                "ID: ${it.id} | ${it.nome} | Marca: ${it.marca} | Modelo: ${it.modelo} | " +
+                "Capacidade: ${it.capacidadeLitros}L | Preco: R$ ${it.preco} | " +
+                "Qtd: ${it.quantidade} | Fornecedor: ${it.nomeFornecedor}"
+            )
+        }
+    }
+
+    // Le do usuario os dados de uma nova caixa e manda salvar no banco.
+    private fun adicionarCaixa() {
+        val caixa = lerDadosCaixa() ?: return
+        val id = CaixaDaAguaRepository.inserir(caixa)
+        println("Caixa cadastrada com sucesso! ID: $id")
+    }
+
+    // Permite alterar uma caixa existente, buscando pelo ID.
+    private fun editarCaixa() {
+        val id = lerInteiroSeguro("ID da caixa") ?: return
+        val caixaAtual = CaixaDaAguaRepository.buscarPorId(id)
+
+        if (caixaAtual == null) {
+            println("Caixa nao encontrada.")
+            return
+        }
+
+        println("Deixe em branco para manter o valor atual.")
+
+        val nome = lerStringOuPadrao("Nome", caixaAtual.nome)
+        val marca = lerStringOuPadrao("Marca", caixaAtual.marca)
+        val modelo = lerStringOuPadrao("Modelo", caixaAtual.modelo)
+        val capacidade = lerInteiroOuPadrao("Capacidade (litros)", caixaAtual.capacidadeLitros)
+        val largura = lerDoubleOuPadrao("Largura", caixaAtual.largura)
+        val altura = lerDoubleOuPadrao("Altura", caixaAtual.altura)
+        val profundidade = lerDoubleOuPadrao("Profundidade", caixaAtual.profundidade)
+        val cor = lerStringOuPadrao("Cor", caixaAtual.cor)
+        val material = lerMaterialOuPadrao(caixaAtual.material)
+        val formato = lerFormatoOuPadrao(caixaAtual.formato)
+        val preco = lerDoubleOuPadrao("Preco", caixaAtual.preco)
+        val quantidade = lerInteiroOuPadrao("Quantidade", caixaAtual.quantidade)
+        val fornecedorId = lerInteiroOuPadrao("ID do fornecedor", caixaAtual.fornecedorId)
+
+        val caixaAtualizada = caixaAtual.copy(
+            nome = nome,
+            marca = marca,
+            modelo = modelo,
+            capacidadeLitros = capacidade,
+            largura = largura,
+            altura = altura,
+            profundidade = profundidade,
+            cor = cor,
+            material = material,
+            formato = formato,
+            preco = preco,
+            quantidade = quantidade,
+            fornecedorId = fornecedorId
+        )
+
+        val ok = CaixaDaAguaRepository.atualizar(caixaAtualizada)
+        println(if (ok) "Caixa atualizada com sucesso!" else "Erro ao atualizar caixa.")
+    }
+
+    // Remove uma caixa do estoque pelo ID.
+    private fun deletarCaixa() {
+        val id = lerInteiroSeguro("ID da caixa") ?: return
+        val ok = CaixaDaAguaRepository.deletar(id)
+        println(if (ok) "Caixa removida com sucesso!" else "Caixa nao encontrada.")
+    }
+
+    // Le todos os dados de uma caixa d'agua nova.
+    // Se o usuario digitar algo errado, retorna null e cancela a operacao.
+    private fun lerDadosCaixa(): CaixaDagua? {
+        print("Nome: ")
+        val nome = readln()
+        print("Marca: ")
+        val marca = readln()
+        print("Modelo: ")
+        val modelo = readln()
+
+        val capacidade = lerInteiroSeguro("Capacidade (litros)") ?: return null
+        val largura = lerDoubleSeguro("Largura") ?: return null
+        val altura = lerDoubleSeguro("Altura") ?: return null
+        val profundidade = lerDoubleSeguro("Profundidade") ?: return null
+
+        print("Cor: ")
+        val cor = readln()
+
+        println("Material: 1-POLIETILENO 2-FIBRA_DE_VIDRO 3-INOX")
+        val material = when (readln()) {
+            "1" -> Material.POLIETILENO
+            "2" -> Material.FIBRA_DE_VIDRO
+            "3" -> Material.INOX
+            else -> {
+                println("Material invalido.")
+                return null
+            }
+        }
+
+        println("Formato: 1-Redondo 2-Quadrado 3-Estreito 4-Conico")
+        val formato = when (readln()) {
+            "1" -> Formato.Redondo
+            "2" -> Formato.Quadrado
+            "3" -> Formato.Estreito
+            "4" -> Formato.Conico
+            else -> {
+                println("Formato invalido.")
+                return null
+            }
+        }
+
+        val preco = lerDoubleSeguro("Preco") ?: return null
+        val quantidade = lerInteiroSeguro("Quantidade em estoque") ?: return null
+        val fornecedorId = lerInteiroSeguro("ID do fornecedor") ?: return null
+
+        return CaixaDagua(
+            id = 0, // ID sera gerado pelo banco
+            nome = nome,
+            marca = marca,
+            modelo = modelo,
+            capacidadeLitros = capacidade,
+            largura = largura,
+            altura = altura,
+            profundidade = profundidade,
+            cor = cor,
+            material = material,
+            formato = formato,
+            preco = preco,
+            quantidade = quantidade,
+            fornecedorId = fornecedorId
+        )
+    }
+
+    // Funcoes helper para editar: se o usuario apertar Enter, mantem o valor atual.
+    private fun lerStringOuPadrao(label: String, padrao: String): String {
+        print("$label [$padrao]: ")
+        return readln().ifBlank { padrao }
+    }
+
+    private fun lerInteiroOuPadrao(label: String, padrao: Int): Int {
+        print("$label [$padrao]: ")
+        return readln().toIntOrNull() ?: padrao
+    }
+
+    private fun lerDoubleOuPadrao(label: String, padrao: Double): Double {
+        print("$label [$padrao]: ")
+        return readln().toDoubleOrNull() ?: padrao
+    }
+
+    private fun lerMaterialOuPadrao(padrao: Material): Material {
+        println("Material [${padrao.name}]: 1-POLIETILENO 2-FIBRA_DE_VIDRO 3-INOX")
+        return when (readln()) {
+            "1" -> Material.POLIETILENO
+            "2" -> Material.FIBRA_DE_VIDRO
+            "3" -> Material.INOX
+            "" -> padrao
+            else -> {
+                println("Material mantido como padrao.")
+                padrao
+            }
+        }
+    }
+
+    private fun lerFormatoOuPadrao(padrao: Formato): Formato {
+        println("Formato [${padrao.name}]: 1-Redondo 2-Quadrado 3-Estreito 4-Conico")
+        return when (readln()) {
+            "1" -> Formato.Redondo
+            "2" -> Formato.Quadrado
+            "3" -> Formato.Estreito
+            "4" -> Formato.Conico
+            "" -> padrao
+            else -> {
+                println("Formato mantido como padrao.")
+                padrao
+            }
+        }
+    }
+}
