@@ -1,5 +1,6 @@
 package model
 
+import enums.CorCaixa
 import enums.Formato
 import enums.Material
 
@@ -7,18 +8,17 @@ import enums.Material
 // batem com as colunas do banco de dados.
 data class CaixaDagua(
     val id: Int,
-    val nome: String,
     val marca: String,
     val modelo: String,
     val capacidadeLitros: Int,
     val largura: Double,
     val altura: Double,
     val profundidade: Double,
-    val cor: String,
+    val cor: CorCaixa,
     val material: Material,
     val formato: Formato,
     val preco: Double,
     val quantidade: Int,
     val fornecedorId: Int,
-    val nomeFornecedor: String = ""
+    val nomeFornecedor: String = "",
 )

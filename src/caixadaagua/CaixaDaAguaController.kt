@@ -1,10 +1,11 @@
 package caixadaagua
 
+import enums.CorCaixa
 import enums.Formato
 import enums.Material
+import model.CaixaDagua
 import utils.lerDoubleSeguro
 import utils.lerInteiroSeguro
-import model.CaixaDagua
 
 // Controller responsavel por exibir os menus e conversar com o usuario
 // no modulo de Caixa d'Agua (estoque de produtos).
@@ -41,9 +42,9 @@ class CaixaDaAguaController {
 
         caixas.forEach {
             println(
-                "ID: ${it.id} | ${it.nome} | Marca: ${it.marca} | Modelo: ${it.modelo} | " +
-                "Capacidade: ${it.capacidadeLitros}L | Preco: R$ ${it.preco} | " +
-                "Qtd: ${it.quantidade} | Fornecedor: ${it.nomeFornecedor}"
+                "ID: ${it.id} | Marca: ${it.marca} | Modelo: ${it.modelo} | " +
+                    "Capacidade: ${it.capacidadeLitros}L | Preco: R$ ${it.preco} | " +
+                    "Qtd: ${it.quantidade} | Fornecedor: ${it.nomeFornecedor}"
             )
         }
     }
@@ -67,35 +68,34 @@ class CaixaDaAguaController {
 
         println("Deixe em branco para manter o valor atual.")
 
-        val nome = lerStringOuPadrao("Nome", caixaAtual.nome)
         val marca = lerStringOuPadrao("Marca", caixaAtual.marca)
         val modelo = lerStringOuPadrao("Modelo", caixaAtual.modelo)
         val capacidade = lerInteiroOuPadrao("Capacidade (litros)", caixaAtual.capacidadeLitros)
         val largura = lerDoubleOuPadrao("Largura", caixaAtual.largura)
         val altura = lerDoubleOuPadrao("Altura", caixaAtual.altura)
         val profundidade = lerDoubleOuPadrao("Profundidade", caixaAtual.profundidade)
-        val cor = lerStringOuPadrao("Cor", caixaAtual.cor)
+        val cor = lerCorOuPadrao(caixaAtual.cor)
         val material = lerMaterialOuPadrao(caixaAtual.material)
         val formato = lerFormatoOuPadrao(caixaAtual.formato)
         val preco = lerDoubleOuPadrao("Preco", caixaAtual.preco)
         val quantidade = lerInteiroOuPadrao("Quantidade", caixaAtual.quantidade)
         val fornecedorId = lerInteiroOuPadrao("ID do fornecedor", caixaAtual.fornecedorId)
 
-        val caixaAtualizada = caixaAtual.copy(
-            nome = nome,
-            marca = marca,
-            modelo = modelo,
-            capacidadeLitros = capacidade,
-            largura = largura,
-            altura = altura,
-            profundidade = profundidade,
-            cor = cor,
-            material = material,
-            formato = formato,
-            preco = preco,
-            quantidade = quantidade,
-            fornecedorId = fornecedorId
-        )
+        val caixaAtualizada =
+            caixaAtual.copy(
+                marca = marca,
+                modelo = modelo,
+                capacidadeLitros = capacidade,
+                largura = largura,
+                altura = altura,
+                profundidade = profundidade,
+                cor = cor,
+                material = material,
+                formato = formato,
+                preco = preco,
+                quantidade = quantidade,
+                fornecedorId = fornecedorId,
+            )
 
         val ok = CaixaDaAguaRepository.atualizar(caixaAtualizada)
         println(if (ok) "Caixa atualizada com sucesso!" else "Erro ao atualizar caixa.")
@@ -111,8 +111,6 @@ class CaixaDaAguaController {
     // Le todos os dados de uma caixa d'agua nova.
     // Se o usuario digitar algo errado, retorna null e cancela a operacao.
     private fun lerDadosCaixa(): CaixaDagua? {
-        print("Nome: ")
-        val nome = readln()
         print("Marca: ")
         val marca = readln()
         print("Modelo: ")
@@ -123,31 +121,42 @@ class CaixaDaAguaController {
         val altura = lerDoubleSeguro("Altura") ?: return null
         val profundidade = lerDoubleSeguro("Profundidade") ?: return null
 
-        print("Cor: ")
-        val cor = readln()
+        println("Cor: 1-Azul 2-Bege 3-Preta")
+        val cor =
+            when (readln()) {
+                "1" -> CorCaixa.Azul
+                "2" -> CorCaixa.Bege
+                "3" -> CorCaixa.Preta
+                else -> {
+                    println("Cor invalida.")
+                    return null
+                }
+            }
 
         println("Material: 1-POLIETILENO 2-FIBRA_DE_VIDRO 3-INOX")
-        val material = when (readln()) {
-            "1" -> Material.POLIETILENO
-            "2" -> Material.FIBRA_DE_VIDRO
-            "3" -> Material.INOX
-            else -> {
-                println("Material invalido.")
-                return null
+        val material =
+            when (readln()) {
+                "1" -> Material.POLIETILENO
+                "2" -> Material.FIBRA_DE_VIDRO
+                "3" -> Material.INOX
+                else -> {
+                    println("Material invalido.")
+                    return null
+                }
             }
-        }
 
         println("Formato: 1-Redondo 2-Quadrado 3-Estreito 4-Conico")
-        val formato = when (readln()) {
-            "1" -> Formato.Redondo
-            "2" -> Formato.Quadrado
-            "3" -> Formato.Estreito
-            "4" -> Formato.Conico
-            else -> {
-                println("Formato invalido.")
-                return null
+        val formato =
+            when (readln()) {
+                "1" -> Formato.Redondo
+                "2" -> Formato.Quadrado
+                "3" -> Formato.Estreito
+                "4" -> Formato.Conico
+                else -> {
+                    println("Formato invalido.")
+                    return null
+                }
             }
-        }
 
         val preco = lerDoubleSeguro("Preco") ?: return null
         val quantidade = lerInteiroSeguro("Quantidade em estoque") ?: return null
@@ -155,7 +164,6 @@ class CaixaDaAguaController {
 
         return CaixaDagua(
             id = 0, // ID sera gerado pelo banco
-            nome = nome,
             marca = marca,
             modelo = modelo,
             capacidadeLitros = capacidade,
@@ -167,7 +175,7 @@ class CaixaDaAguaController {
             formato = formato,
             preco = preco,
             quantidade = quantidade,
-            fornecedorId = fornecedorId
+            fornecedorId = fornecedorId,
         )
     }
 
@@ -211,6 +219,20 @@ class CaixaDaAguaController {
             "" -> padrao
             else -> {
                 println("Formato mantido como padrao.")
+                padrao
+            }
+        }
+    }
+
+    private fun lerCorOuPadrao(padrao: CorCaixa): CorCaixa {
+        println("Cor [${padrao.name}]: 1-Azul 2-Bege 3-Preta")
+        return when (readln()) {
+            "1" -> CorCaixa.Azul
+            "2" -> CorCaixa.Bege
+            "3" -> CorCaixa.Preta
+            "" -> padrao
+            else -> {
+                println("Cor mantida como padrao.")
                 padrao
             }
         }

@@ -27,7 +27,7 @@ class FornecedorController(private val repositorio: PessoaRepository) {
     }
 
     private fun cadastrarFornecedor() {
-        val dados = lerDadosComunsPessoa() ?: return
+        val dados = lerDadosComunsPessoa(repositorio)
 
         var razaoSocial: String
         while (true) {
@@ -42,25 +42,22 @@ class FornecedorController(private val repositorio: PessoaRepository) {
         }
 
         // O cadastro e inserção devem ficar FORA do laço de validação:
-        val fornecedor = Fornecedor(
-            idFornecedor = 0,
-            nomeFornecedor = dados.nome,
-            documentoFornecedor = dados.documento,
-            telefoneFornecedor = dados.telefone,
-        )
+        val fornecedor =
+            Fornecedor(
+                idFornecedor = 0,
+                nomeFornecedor = dados.nome,
+                documentoFornecedor = dados.documento,
+                telefoneFornecedor = dados.telefone,
+            )
 
         val ok = repositorio.inserir(fornecedor, razaoSocial = razaoSocial)
         println(if (ok) "Fornecedor cadastrado com sucesso!" else "Erro ao cadastrar fornecedor.")
-
-
     }
 
     private fun listar() {
-        repositorio.listarAtivos()
-            .filterIsInstance<Fornecedor>()
-            .forEach {
-                println("${it.id} - ${it.nome} | Documento: ${it.documento} | Telefone: ${it.telefone}")
-            }
+        repositorio.listarAtivos().filterIsInstance<Fornecedor>().forEach {
+            println("${it.id} - ${it.nome} | Documento: ${it.documento} | Telefone: ${it.telefone}")
+        }
     }
 
     private fun inativar() {

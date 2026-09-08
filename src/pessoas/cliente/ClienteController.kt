@@ -1,9 +1,9 @@
 package pessoas.cliente
 
-import utils.lerDoubleSeguro
 import model.Cliente
 import pessoas.PessoaRepository
 import pessoas.lerDadosComunsPessoa
+import utils.lerDoubleSeguro
 
 class ClienteController(private val repositorio: PessoaRepository) {
 
@@ -27,27 +27,26 @@ class ClienteController(private val repositorio: PessoaRepository) {
     }
 
     private fun cadastrarCliente() {
-        val dados = lerDadosComunsPessoa() ?: return
+        val dados = lerDadosComunsPessoa(repositorio)
 
         val limiteCredito = lerDoubleSeguro("Limite de Credito") ?: 0.0
 
-        val cliente = Cliente(
-            idCliente = 0,
-            nomeCliente = dados.nome,
-            documentoCliente = dados.documento,
-            telefoneCliente = dados.telefone,
-        )
+        val cliente =
+            Cliente(
+                idCliente = 0,
+                nomeCliente = dados.nome,
+                documentoCliente = dados.documento,
+                telefoneCliente = dados.telefone,
+            )
 
         val ok = repositorio.inserir(cliente, limiteCredito = limiteCredito)
         println(if (ok) "Cliente cadastrado com sucesso!" else "Erro ao cadastrar cliente.")
     }
 
     private fun listar() {
-        repositorio.listarAtivos()
-            .filterIsInstance<Cliente>()
-            .forEach {
-                println("${it.id} - ${it.nome} | Documento: ${it.documento} | Telefone: ${it.telefone}")
-            }
+        repositorio.listarAtivos().filterIsInstance<Cliente>().forEach {
+            println("${it.id} - ${it.nome} | Documento: ${it.documento} | Telefone: ${it.telefone}")
+        }
     }
 
     private fun inativar() {

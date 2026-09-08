@@ -1,6 +1,7 @@
 package caixadaagua
 
 import database.DbConnection
+import enums.CorCaixa
 import enums.Formato
 import enums.Material
 import java.sql.PreparedStatement
@@ -16,14 +17,13 @@ object CaixaDaAguaRepository {
     private fun mapearCaixa(rs: ResultSet): CaixaDagua {
         return CaixaDagua(
             id = rs.getInt("id"),
-            nome = rs.getString("nome"),
             marca = rs.getString("marca"),
             modelo = rs.getString("modelo"),
             capacidadeLitros = rs.getInt("capacidade_litros"),
             largura = rs.getDouble("largura"),
             altura = rs.getDouble("altura"),
             profundidade = rs.getDouble("profundidade"),
-            cor = rs.getString("cor"),
+            cor = CorCaixa.valueOf(rs.getString("cor")),
             material = Material.valueOf(rs.getString("material")),
             formato = Formato.valueOf(rs.getString("formato")),
             preco = rs.getDouble("preco"),
@@ -36,19 +36,18 @@ object CaixaDaAguaRepository {
     // Preenche os valores comuns de uma caixa d'agua num PreparedStatement,
     // tanto para inserir quanto para atualizar.
     private fun preencherStatement(stmt: PreparedStatement, caixa: CaixaDagua, inicio: Int) {
-        stmt.setString(inicio, caixa.nome)
-        stmt.setString(inicio + 1, caixa.marca)
-        stmt.setString(inicio + 2, caixa.modelo)
-        stmt.setInt(inicio + 3, caixa.capacidadeLitros)
-        stmt.setDouble(inicio + 4, caixa.largura)
-        stmt.setDouble(inicio + 5, caixa.altura)
-        stmt.setDouble(inicio + 6, caixa.profundidade)
-        stmt.setString(inicio + 7, caixa.cor)
-        stmt.setString(inicio + 8, caixa.material.name)
-        stmt.setString(inicio + 9, caixa.formato.name)
-        stmt.setDouble(inicio + 10, caixa.preco)
-        stmt.setInt(inicio + 11, caixa.quantidade)
-        stmt.setInt(inicio + 12, caixa.fornecedorId)
+        stmt.setString(inicio, caixa.marca)
+        stmt.setString(inicio + 1, caixa.modelo)
+        stmt.setInt(inicio + 2, caixa.capacidadeLitros)
+        stmt.setDouble(inicio + 3, caixa.largura)
+        stmt.setDouble(inicio + 4, caixa.altura)
+        stmt.setDouble(inicio + 5, caixa.profundidade)
+        stmt.setString(inicio + 6, caixa.cor.name)
+        stmt.setString(inicio + 7, caixa.material.name)
+        stmt.setString(inicio + 8, caixa.formato.name)
+        stmt.setDouble(inicio + 9, caixa.preco)
+        stmt.setInt(inicio + 10, caixa.quantidade)
+        stmt.setInt(inicio + 11, caixa.fornecedorId)
     }
 
     // Cadastra uma nova caixa d'agua no banco e devolve o ID gerado.
@@ -56,9 +55,9 @@ object CaixaDaAguaRepository {
         val sql =
             """
             INSERT INTO CAIXA_DA_AGUA (
-                nome, marca, modelo, capacidade_litros, largura, altura,
+                marca, modelo, capacidade_litros, largura, altura,
                 profundidade, cor, material, formato, preco, quantidade, fornecedor_id
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """
                 .trimIndent()
 
@@ -121,7 +120,7 @@ object CaixaDaAguaRepository {
         val sql =
             """
             UPDATE CAIXA_DA_AGUA SET
-                nome = ?, marca = ?, modelo = ?, capacidade_litros = ?, largura = ?,
+                marca = ?, modelo = ?, capacidade_litros = ?, largura = ?,
                 altura = ?, profundidade = ?, cor = ?, material = ?, formato = ?,
                 preco = ?, quantidade = ?, fornecedor_id = ?
             WHERE id = ?
@@ -131,7 +130,7 @@ object CaixaDaAguaRepository {
         DbConnection.conectar().use { conn ->
             conn.prepareStatement(sql).use { stmt ->
                 preencherStatement(stmt, caixa, 1)
-                stmt.setInt(14, caixa.id)
+                stmt.setInt(13, caixa.id)
                 return stmt.executeUpdate() > 0
             }
         }

@@ -4,7 +4,7 @@ import utils.Validador
 
 data class DadosComunsPessoa(val nome: String, val documento: String, val telefone: String)
 
-fun lerDadosComunsPessoa(): DadosComunsPessoa {
+fun lerDadosComunsPessoa(repositorio: PessoaRepository): DadosComunsPessoa {
     print("Nome: ")
     val nome = readln()
 
@@ -13,10 +13,19 @@ fun lerDadosComunsPessoa(): DadosComunsPessoa {
         print("Documento (CPF/CNPJ): ")
         documento = readln()
 
-        if (Validador.documentoValido(documento)) {
-            break
+        if (!Validador.documentoValido(documento)) {
+            println(
+                "Documento inválido. Use 11 dígitos (CPF) ou 14 dígitos (CNPJ). Tente novamente."
+            )
+            continue
         }
-        println("Documento inválido. Use 11 dígitos (CPF) ou 14 dígitos (CNPJ). Tente novamente.")
+
+        if (repositorio.documentoJaExiste(documento)) {
+            println("Documento ja cadastrado. Informe um documento diferente.")
+            continue
+        }
+
+        break
     }
 
     var telefone: String

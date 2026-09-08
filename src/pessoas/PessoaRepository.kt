@@ -38,34 +38,37 @@ class PessoaRepository private constructor(val dbConnection: DbConnection) {
                 val setor = rs.getString("setor") ?: Setor.FINANCEIRO.name
                 val salario = rs.getBigDecimal("salario") ?: BigDecimal.ZERO
                 Funcionario(
-                    idFuncionario = id,
-                    nomeFuncionario = nome,
-                    documentoFuncionario = documento,
-                    telefoneFuncionario = telefone,
-                    setor = Setor.valueOf(setor),
-                    salario = salario,
-                ).apply { this.ativo = ativo }
+                        idFuncionario = id,
+                        nomeFuncionario = nome,
+                        documentoFuncionario = documento,
+                        telefoneFuncionario = telefone,
+                        setor = Setor.valueOf(setor),
+                        salario = salario,
+                    )
+                    .apply { this.ativo = ativo }
             }
             TipoPessoa.FORNECEDOR ->
                 Fornecedor(
-                    idFornecedor = id,
-                    nomeFornecedor = nome,
-                    documentoFornecedor = documento,
-                    telefoneFornecedor = telefone,
-                ).apply { this.ativo = ativo }
+                        idFornecedor = id,
+                        nomeFornecedor = nome,
+                        documentoFornecedor = documento,
+                        telefoneFornecedor = telefone,
+                    )
+                    .apply { this.ativo = ativo }
             TipoPessoa.CLIENTE ->
                 Cliente(
-                    idCliente = id,
-                    nomeCliente = nome,
-                    documentoCliente = documento,
-                    telefoneCliente = telefone,
-                ).apply { this.ativo = ativo }
+                        idCliente = id,
+                        nomeCliente = nome,
+                        documentoCliente = documento,
+                        telefoneCliente = telefone,
+                    )
+                    .apply { this.ativo = ativo }
         }
     }
 
     // Verifica se ja existe uma pessoa com o mesmo CPF/CNPJ no banco.
     // Usada para evitar documentos duplicados no cadastro.
-    private fun documentoJaExiste(documento: String): Boolean {
+    fun documentoJaExiste(documento: String): Boolean {
         val sql = "SELECT 1 FROM PESSOA WHERE cpf_cnpj = ?"
         DbConnection.conectar().use { conn ->
             conn.prepareStatement(sql).use { stmt ->

@@ -2,7 +2,6 @@ package venda
 
 import caixadaagua.CaixaDaAguaRepository
 import financeiro.FinanceiroRepository
-import utils.lerInteiroSeguro
 import model.Cliente
 import model.Funcionario
 import model.ItemVenda
@@ -12,6 +11,7 @@ import model.Venda
 import pessoas.PessoaRepository
 import servico.ServicoRepository
 import utils.Logger
+import utils.lerInteiroSeguro
 
 // Controller da frente de caixa.
 // Permite criar vendas, ver o historico e estornar vendas.
@@ -134,7 +134,9 @@ class VendaController {
         }
 
         caixas.forEach {
-            println("${it.id} - ${it.nome} | Preco: R$ ${it.preco} | Estoque: ${it.quantidade}")
+            println(
+                "${it.id} - ${it.marca} ${it.modelo} | Preco: R$ ${it.preco} | Estoque: ${it.quantidade}"
+            )
         }
 
         val id = lerInteiroSeguro("ID da caixa") ?: return
@@ -158,7 +160,7 @@ class VendaController {
                 valorTotal = qtd * caixa.preco,
             )
         )
-        println("Item adicionado: ${caixa.nome} x$qtd")
+        println("Item adicionado: ${caixa.marca} ${caixa.modelo} x$qtd")
     }
 
     // Adiciona um servico na venda.

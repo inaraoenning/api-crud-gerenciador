@@ -2,10 +2,10 @@ package pessoas.funcionario
 
 import enums.Setor
 import java.math.BigDecimal
-import utils.lerDoubleSeguro
 import model.Funcionario
 import pessoas.PessoaRepository
 import pessoas.lerDadosComunsPessoa
+import utils.lerDoubleSeguro
 
 class FuncionarioController(private val repositorio: PessoaRepository) {
 
@@ -29,7 +29,7 @@ class FuncionarioController(private val repositorio: PessoaRepository) {
     }
 
     private fun cadastrarFuncionario() {
-        val dados = lerDadosComunsPessoa() ?: return
+        val dados = lerDadosComunsPessoa(repositorio)
 
         println("Setor: 1-Financeiro 2-Comercial 3-Manutencao")
         val setor =
