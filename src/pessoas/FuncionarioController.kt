@@ -1,10 +1,9 @@
-package pessoas.funcionario
+package pessoas
 
 import enums.Setor
 import lerDoubleSeguro
 import model.Funcionario
-import pessoas.pessoa.PessoaRepository
-import pessoas.pessoa.lerDadosComunsPessoa
+import java.math.BigDecimal
 
 class FuncionarioController(private val repositorio: PessoaRepository) {
 
@@ -50,7 +49,7 @@ class FuncionarioController(private val repositorio: PessoaRepository) {
                 nomeFuncionario = dados.nome,
                 documentoFuncionario = dados.documento,
                 telefoneFuncionario = dados.telefone,
-                salario = java.math.BigDecimal.valueOf(salario),
+                salario = BigDecimal.valueOf(salario),
                 setor = setor,
             )
 

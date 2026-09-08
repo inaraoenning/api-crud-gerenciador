@@ -1,7 +1,7 @@
 import caixadaagua.CaixaDaAguaController
 import financeiro.FinanceiroController
-import pessoas.pessoa.PessoaController
-import pessoas.pessoa.PessoaRepository
+import pessoas.PessoaController
+import pessoas.PessoaRepository
 import servico.ServicoController
 import venda.VendaController
 

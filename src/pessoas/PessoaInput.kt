@@ -1,4 +1,4 @@
-package pessoas.pessoa
+package pessoas
 
 data class DadosComunsPessoa(
     val nome: String,

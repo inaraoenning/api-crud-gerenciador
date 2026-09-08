@@ -4,8 +4,7 @@ import enums.Formato
 import enums.Material
 
 // Classe que representa uma caixa d'agua no estoque.
-// Os nomes dos campos foram deixados em portugues para facilitar a leitura,
-// mas batem com as colunas do banco de dados.
+// batem com as colunas do banco de dados.
 data class CaixaDagua(
     val id: Int,
     val nome: String,

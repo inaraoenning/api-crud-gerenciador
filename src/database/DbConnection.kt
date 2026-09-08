@@ -5,9 +5,9 @@ import java.sql.DriverManager
 
 object DbConnection {
     private val url: String =
-        "jdbc:postgresql://dpg-da26n9fqj5pc73dmoi1g-a.oregon-postgres.render.com/caixa_da_agua?sslmode=require"
-    private val user: String = "gerente"
-    private val senha: String = "jhv0YfevlPgTUocEOX2udiXoBpIrim06"
+        "jdbc:postgresql://dpg-dafuit7qj5pc738e0kbg-a.oregon-postgres.render.com/dbgerenciador?sslmode=require"
+    private val user: String = "admin"
+    private val senha: String = "RgI9R6NyTQJQmEyGOkquMnWMeS7eN4u1"
 
     // Retorna a conexão ao invés de guardar numa variável global mutável
     fun conectar(): Connection {

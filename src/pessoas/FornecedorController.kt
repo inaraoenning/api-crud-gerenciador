@@ -1,8 +1,6 @@
-package pessoas.fornecedor
+package pessoas
 
 import model.Fornecedor
-import pessoas.pessoa.PessoaRepository
-import pessoas.pessoa.lerDadosComunsPessoa
 
 class FornecedorController(private val repositorio: PessoaRepository) {
 

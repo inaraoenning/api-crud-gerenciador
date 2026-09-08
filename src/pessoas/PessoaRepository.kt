@@ -1,4 +1,4 @@
-package pessoas.pessoa
+package pessoas
 
 import database.DbConnection
 import enums.Setor
