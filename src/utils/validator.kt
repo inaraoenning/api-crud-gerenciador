@@ -3,7 +3,6 @@ package utils
 object Validador {
     private val regexCpfCnpj = Regex("^\\d{11}$|^\\d{14}$")
     private val regexTelefone = Regex("^\\(?\\d{2}\\)?\\s?\\d{4,5}-?\\d{4}$")
-    private val regexEmail = Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
 
     fun documentoValido(documento: String?): Boolean {
         return documento?.matches(regexCpfCnpj) ?: false

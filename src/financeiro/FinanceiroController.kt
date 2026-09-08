@@ -1,7 +1,7 @@
 package financeiro
 
-import lerDoubleSeguro
-import lerInteiroSeguro
+import utils.lerDoubleSeguro
+import utils.lerInteiroSeguro
 import model.Funcionario
 import model.MovimentacaoFinanceira
 import model.TipoMovimentacao
