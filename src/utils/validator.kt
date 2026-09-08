@@ -1,3 +1,5 @@
+package utils
+
 object Validador {
     private val regexCpfCnpj = Regex("^\\d{11}$|^\\d{14}$")
     private val regexTelefone = Regex("^\\(?\\d{2}\\)?\\s?\\d{4,5}-?\\d{4}$")
@@ -11,8 +13,10 @@ object Validador {
         return telefone?.matches(regexTelefone) ?: false
     }
 
-    fun emailValido(email: String?): Boolean {
-        return email?.matches(regexEmail) ?: false
+    fun razaoSocialValida(razaoSocial: String): Boolean {
+        // Permite letras (com e sem acento), números, espaços, apóstrofo ('), hífen (-), ponto (.) e comercial (&)
+        val regex = Regex("^[a-zA-Z0-9À-ÿ'\\s.\\-/&]+$")
+        return razaoSocial.isNotBlank() && regex.matches(razaoSocial)
     }
 }
 

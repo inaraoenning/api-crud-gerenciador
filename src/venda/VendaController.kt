@@ -2,7 +2,7 @@ package venda
 
 import caixadaagua.CaixaDaAguaRepository
 import financeiro.FinanceiroRepository
-import lerInteiroSeguro
+import utils.lerInteiroSeguro
 import model.Cliente
 import model.Funcionario
 import model.ItemVenda

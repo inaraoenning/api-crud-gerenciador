@@ -1,25 +1,33 @@
 package pessoas
 
-import Validador
+import utils.Validador
 
 data class DadosComunsPessoa(val nome: String, val documento: String, val telefone: String)
 
-fun lerDadosComunsPessoa(): DadosComunsPessoa? {
+fun lerDadosComunsPessoa(): DadosComunsPessoa {
     print("Nome: ")
     val nome = readln()
-    print("Documento (CPF/CNPJ): ")
-    val documento = readln()
-    print("Telefone: ")
-    val telefone = readln()
 
-    if (!Validador.documentoValido(documento)) {
-        println("Documento invalido. Use 11 digitos (CPF) ou 14 digitos (CNPJ).")
-        return null
+    var documento: String
+    while (true) {
+        print("Documento (CPF/CNPJ): ")
+        documento = readln()
+
+        if (Validador.documentoValido(documento)) {
+            break
+        }
+        println("Documento inválido. Use 11 dígitos (CPF) ou 14 dígitos (CNPJ). Tente novamente.")
     }
 
-    if (!Validador.telefoneValido(telefone)) {
-        println("Telefone invalido.")
-        return null
+    var telefone: String
+    while (true) {
+        print("Telefone: ")
+        telefone = readln()
+
+        if (Validador.telefoneValido(telefone)) {
+            break
+        }
+        println("Telefone inválido. Tente novamente.")
     }
 
     return DadosComunsPessoa(nome, documento, telefone)

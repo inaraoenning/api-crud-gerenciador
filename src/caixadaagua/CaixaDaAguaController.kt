@@ -2,8 +2,8 @@ package caixadaagua
 
 import enums.Formato
 import enums.Material
-import lerDoubleSeguro
-import lerInteiroSeguro
+import utils.lerDoubleSeguro
+import utils.lerInteiroSeguro
 import model.CaixaDagua
 
 // Controller responsavel por exibir os menus e conversar com o usuario

@@ -2,7 +2,7 @@ package pessoas.funcionario
 
 import enums.Setor
 import java.math.BigDecimal
-import lerDoubleSeguro
+import utils.lerDoubleSeguro
 import model.Funcionario
 import pessoas.PessoaRepository
 import pessoas.lerDadosComunsPessoa

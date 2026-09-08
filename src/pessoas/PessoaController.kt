@@ -1,6 +1,6 @@
 package pessoas
 
-import lerInteiroSeguro
+import utils.lerInteiroSeguro
 import pessoas.cliente.ClienteController
 import pessoas.fornecedor.FornecedorController
 import pessoas.funcionario.FuncionarioController

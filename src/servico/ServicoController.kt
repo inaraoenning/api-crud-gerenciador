@@ -1,7 +1,7 @@
 package servico
 
-import lerDoubleSeguro
-import lerInteiroSeguro
+import utils.lerDoubleSeguro
+import utils.lerInteiroSeguro
 import model.Servico
 
 // Controller do modulo de Servicos.

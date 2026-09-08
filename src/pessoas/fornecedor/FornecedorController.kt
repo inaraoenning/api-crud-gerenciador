@@ -3,6 +3,7 @@ package pessoas.fornecedor
 import model.Fornecedor
 import pessoas.PessoaRepository
 import pessoas.lerDadosComunsPessoa
+import utils.Validador
 
 class FornecedorController(private val repositorio: PessoaRepository) {
 
@@ -28,9 +29,19 @@ class FornecedorController(private val repositorio: PessoaRepository) {
     private fun cadastrarFornecedor() {
         val dados = lerDadosComunsPessoa() ?: return
 
-        print("Razao Social (ou Enter para usar o nome): ")
-        val razaoSocial = readln().ifBlank { dados.nome }
+        var razaoSocial: String
+        while (true) {
+            print("Razao Social (ou Enter para usar o nome '${dados.nome}'): ")
+            razaoSocial = readln().ifBlank { dados.nome }
 
+            if (Validador.razaoSocialValida(razaoSocial)) {
+                break // Sai do laço apenas quando a razão social for válida
+            }
+
+            println("Razão Social contém caracteres inválidos. Tente novamente.")
+        }
+
+        // O cadastro e inserção devem ficar FORA do laço de validação:
         val fornecedor = Fornecedor(
             idFornecedor = 0,
             nomeFornecedor = dados.nome,
@@ -40,6 +51,8 @@ class FornecedorController(private val repositorio: PessoaRepository) {
 
         val ok = repositorio.inserir(fornecedor, razaoSocial = razaoSocial)
         println(if (ok) "Fornecedor cadastrado com sucesso!" else "Erro ao cadastrar fornecedor.")
+
+
     }
 
     private fun listar() {

@@ -1,6 +1,6 @@
 package pessoas.cliente
 
-import lerDoubleSeguro
+import utils.lerDoubleSeguro
 import model.Cliente
 import pessoas.PessoaRepository
 import pessoas.lerDadosComunsPessoa
