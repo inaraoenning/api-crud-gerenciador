@@ -1,10 +1,8 @@
 package pessoas
 
-data class DadosComunsPessoa(
-    val nome: String,
-    val documento: String,
-    val telefone: String
-)
+import Validador
+
+data class DadosComunsPessoa(val nome: String, val documento: String, val telefone: String)
 
 fun lerDadosComunsPessoa(): DadosComunsPessoa? {
     print("Nome: ")

@@ -1,9 +1,9 @@
 package servico
 
 import database.DbConnection
-import model.Servico
 import java.sql.PreparedStatement
 import java.sql.ResultSet
+import model.Servico
 
 // Repository para a tabela SERVICO.
 // Faz o CRUD basico de servicos oferecidos.
@@ -14,7 +14,7 @@ object ServicoRepository {
             id = rs.getInt("id"),
             nome = rs.getString("nome"),
             descricao = rs.getString("descricao"),
-            preco = rs.getDouble("preco")
+            preco = rs.getDouble("preco"),
         )
     }
 

@@ -1,7 +1,9 @@
-package pessoas
+package pessoas.cliente
 
 import lerDoubleSeguro
 import model.Cliente
+import pessoas.PessoaRepository
+import pessoas.lerDadosComunsPessoa
 
 class ClienteController(private val repositorio: PessoaRepository) {
 

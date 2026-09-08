@@ -1,11 +1,11 @@
 package venda
 
 import database.DbConnection
-import model.ItemVenda
-import model.Venda
 import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.Timestamp
+import model.ItemVenda
+import model.Venda
 
 // Repository responsavel pelas vendas.
 // Uma venda envolve duas tabelas: VENDA (cabecalho) e VENDA_ITEM (itens).
@@ -18,7 +18,7 @@ object VendaRepository {
             funcionarioId = rs.getInt("funcionario_id"),
             clienteId = rs.getInt("cliente_id"),
             dataHora = rs.getTimestamp("data_hora").toLocalDateTime(),
-            valorTotal = rs.getDouble("valor_total")
+            valorTotal = rs.getDouble("valor_total"),
         )
     }
 
@@ -31,21 +31,25 @@ object VendaRepository {
             servicoId = rs.getObject("servico_id") as? Int,
             quantidade = rs.getInt("quantidade"),
             precoUnitario = rs.getDouble("preco_unitario"),
-            valorTotal = rs.getDouble("valor_total")
+            valorTotal = rs.getDouble("valor_total"),
         )
     }
 
     // Cria uma venda completa com seus itens, atualiza o estoque e retorna o ID da venda.
     fun inserir(venda: Venda): Int {
-        val sqlVenda = """
+        val sqlVenda =
+            """
             INSERT INTO VENDA (funcionario_id, cliente_id, data_hora, valor_total)
             VALUES (?, ?, ?, ?)
-        """.trimIndent()
+            """
+                .trimIndent()
 
-        val sqlItem = """
+        val sqlItem =
+            """
             INSERT INTO VENDA_ITEM (venda_id, caixa_da_agua_id, servico_id, quantidade, preco_unitario, valor_total)
             VALUES (?, ?, ?, ?, ?, ?)
-        """.trimIndent()
+            """
+                .trimIndent()
 
         val sqlAtualizaEstoque = "UPDATE CAIXA_DA_AGUA SET quantidade = quantidade - ? WHERE id = ?"
 
@@ -53,17 +57,19 @@ object VendaRepository {
             conn.autoCommit = false
 
             try {
-                val vendaId = conn.prepareStatement(sqlVenda, PreparedStatement.RETURN_GENERATED_KEYS).use { stmt ->
-                    stmt.setInt(1, venda.funcionarioId)
-                    stmt.setInt(2, venda.clienteId)
-                    stmt.setTimestamp(3, Timestamp.valueOf(venda.dataHora))
-                    stmt.setDouble(4, venda.valorTotal)
-                    stmt.executeUpdate()
+                val vendaId =
+                    conn.prepareStatement(sqlVenda, PreparedStatement.RETURN_GENERATED_KEYS).use {
+                        stmt ->
+                        stmt.setInt(1, venda.funcionarioId)
+                        stmt.setInt(2, venda.clienteId)
+                        stmt.setTimestamp(3, Timestamp.valueOf(venda.dataHora))
+                        stmt.setDouble(4, venda.valorTotal)
+                        stmt.executeUpdate()
 
-                    val rs = stmt.generatedKeys
-                    rs.next()
-                    rs.getInt(1)
-                }
+                        val rs = stmt.generatedKeys
+                        rs.next()
+                        rs.getInt(1)
+                    }
 
                 conn.prepareStatement(sqlItem).use { stmt ->
                     for (item in venda.itens) {
@@ -183,10 +189,11 @@ object VendaRepository {
                     stmt.executeUpdate()
                 }
 
-                val deletado = conn.prepareStatement(sqlDeletaVenda).use { stmt ->
-                    stmt.setInt(1, id)
-                    stmt.executeUpdate() > 0
-                }
+                val deletado =
+                    conn.prepareStatement(sqlDeletaVenda).use { stmt ->
+                        stmt.setInt(1, id)
+                        stmt.executeUpdate() > 0
+                    }
 
                 conn.commit()
                 return deletado

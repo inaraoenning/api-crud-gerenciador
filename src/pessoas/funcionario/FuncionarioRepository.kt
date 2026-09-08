@@ -2,9 +2,9 @@ package pessoas.funcionario
 
 import database.DbConnection
 import enums.Setor
-import model.Funcionario
 import java.math.BigDecimal
 import java.sql.ResultSet
+import model.Funcionario
 
 // Repository especifico para funcionarios.
 // Apesar de o cadastro basico ficar no PessoaRepository, aqui ficam consultas
@@ -13,25 +13,26 @@ object FuncionarioRepository {
 
     private fun mapearFuncionario(rs: ResultSet): Funcionario {
         return Funcionario(
-            idFuncionario = rs.getInt("pessoa_id"),
-            nomeFuncionario = rs.getString("nome"),
-            documentoFuncionario = rs.getString("cpf_cnpj"),
-            telefoneFuncionario = rs.getString("telefone"),
-            salario = rs.getBigDecimal("salario") ?: BigDecimal.ZERO,
-            setor = Setor.valueOf(rs.getString("setor") ?: "FINANCEIRO")
-        ).apply {
-            ativo = rs.getBoolean("ativo")
-        }
+                idFuncionario = rs.getInt("pessoa_id"),
+                nomeFuncionario = rs.getString("nome"),
+                documentoFuncionario = rs.getString("cpf_cnpj"),
+                telefoneFuncionario = rs.getString("telefone"),
+                salario = rs.getBigDecimal("salario") ?: BigDecimal.ZERO,
+                setor = Setor.valueOf(rs.getString("setor") ?: "FINANCEIRO"),
+            )
+            .apply { ativo = rs.getBoolean("ativo") }
     }
 
     // Lista todos os funcionarios ativos do banco.
     fun listarAtivos(): List<Funcionario> {
-        val sql = """
+        val sql =
+            """
             SELECT p.id as pessoa_id, p.nome, p.cpf_cnpj, p.telefone, p.ativo, f.salario, f.setor
             FROM PESSOA p
             JOIN FUNCIONARIO f ON f.pessoa_id = p.id
             WHERE p.ativo = TRUE
-        """.trimIndent()
+            """
+                .trimIndent()
 
         val funcionarios = mutableListOf<Funcionario>()
         DbConnection.conectar().use { conn ->
@@ -47,12 +48,14 @@ object FuncionarioRepository {
 
     // Lista funcionarios filtrados por setor.
     fun listarPorSetor(setor: Setor): List<Funcionario> {
-        val sql = """
+        val sql =
+            """
             SELECT p.id as pessoa_id, p.nome, p.cpf_cnpj, p.telefone, p.ativo, f.salario, f.setor
             FROM PESSOA p
             JOIN FUNCIONARIO f ON f.pessoa_id = p.id
             WHERE p.ativo = TRUE AND f.setor = ?
-        """.trimIndent()
+            """
+                .trimIndent()
 
         val funcionarios = mutableListOf<Funcionario>()
         DbConnection.conectar().use { conn ->
@@ -69,12 +72,14 @@ object FuncionarioRepository {
 
     // Busca um funcionario ativo pelo ID da pessoa.
     fun buscarPorId(id: Int): Funcionario? {
-        val sql = """
+        val sql =
+            """
             SELECT p.id as pessoa_id, p.nome, p.cpf_cnpj, p.telefone, p.ativo, f.salario, f.setor
             FROM PESSOA p
             JOIN FUNCIONARIO f ON f.pessoa_id = p.id
             WHERE p.id = ? AND p.ativo = TRUE
-        """.trimIndent()
+            """
+                .trimIndent()
 
         DbConnection.conectar().use { conn ->
             conn.prepareStatement(sql).use { stmt ->

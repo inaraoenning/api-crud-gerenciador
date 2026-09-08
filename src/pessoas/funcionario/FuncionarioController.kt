@@ -1,9 +1,11 @@
-package pessoas
+package pessoas.funcionario
 
 import enums.Setor
+import java.math.BigDecimal
 import lerDoubleSeguro
 import model.Funcionario
-import java.math.BigDecimal
+import pessoas.PessoaRepository
+import pessoas.lerDadosComunsPessoa
 
 class FuncionarioController(private val repositorio: PessoaRepository) {
 

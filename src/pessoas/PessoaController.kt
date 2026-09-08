@@ -1,6 +1,9 @@
 package pessoas
 
 import lerInteiroSeguro
+import pessoas.cliente.ClienteController
+import pessoas.fornecedor.FornecedorController
+import pessoas.funcionario.FuncionarioController
 
 class PessoaController(private val repositorio: PessoaRepository) {
 

@@ -5,7 +5,7 @@ import lerInteiroSeguro
 import model.Funcionario
 import model.MovimentacaoFinanceira
 import model.TipoMovimentacao
-import pessoas.pessoa.PessoaRepository
+import pessoas.PessoaRepository
 import utils.Logger
 
 // Controller do modulo financeiro.
@@ -38,13 +38,16 @@ class FinanceiroController {
 
     // Paga o salario de um funcionario, registrando como saida no caixa.
     private fun pagarSalario() {
-        val funcionarios = PessoaRepository.getInstancia().listarAtivos().filterIsInstance<Funcionario>()
+        val funcionarios =
+            PessoaRepository.getInstancia().listarAtivos().filterIsInstance<Funcionario>()
         if (funcionarios.isEmpty()) {
             println("Nenhum funcionario cadastrado.")
             return
         }
 
-        funcionarios.forEach { println("${it.id} - ${it.nome} | Setor: ${it.setor} | Salario: R$ ${it.salario}") }
+        funcionarios.forEach {
+            println("${it.id} - ${it.nome} | Setor: ${it.setor} | Salario: R$ ${it.salario}")
+        }
         val id = lerInteiroSeguro("ID do funcionario") ?: return
         val funcionario = funcionarios.find { it.id == id }
 
@@ -53,19 +56,22 @@ class FinanceiroController {
             return
         }
 
-        val movimentacao = MovimentacaoFinanceira(
-            valor = funcionario.salario.toDouble(),
-            pagador = "Empresa",
-            recebedor = funcionario.nome,
-            motivo = "Pagamento de salario - ${funcionario.nome}",
-            responsavel = "Setor Financeiro",
-            tipo = TipoMovimentacao.SAIDA
-        )
+        val movimentacao =
+            MovimentacaoFinanceira(
+                valor = funcionario.salario.toDouble(),
+                pagador = "Empresa",
+                recebedor = funcionario.nome,
+                motivo = "Pagamento de salario - ${funcionario.nome}",
+                responsavel = "Setor Financeiro",
+                tipo = TipoMovimentacao.SAIDA,
+            )
 
         try {
             val idMov = FinanceiroRepository.registrar(movimentacao)
             println("Salario pago! Movimentacao registrada ID: $idMov")
-            Logger.info("Salario pago ao funcionario ${funcionario.nome}: R$ ${funcionario.salario}")
+            Logger.info(
+                "Salario pago ao funcionario ${funcionario.nome}: R$ ${funcionario.salario}"
+            )
         } catch (e: Exception) {
             println("Erro ao pagar salario: ${e.message}")
             Logger.erro("Erro ao pagar salario de ${funcionario.nome}: ${e.message}")
@@ -84,14 +90,15 @@ class FinanceiroController {
         val responsavel = readln()
         val valor = lerDoubleSeguro("Valor") ?: return
 
-        val movimentacao = MovimentacaoFinanceira(
-            valor = valor,
-            pagador = pagador,
-            recebedor = recebedor,
-            motivo = motivo,
-            responsavel = responsavel,
-            tipo = TipoMovimentacao.SAIDA
-        )
+        val movimentacao =
+            MovimentacaoFinanceira(
+                valor = valor,
+                pagador = pagador,
+                recebedor = recebedor,
+                motivo = motivo,
+                responsavel = responsavel,
+                tipo = TipoMovimentacao.SAIDA,
+            )
 
         try {
             val id = FinanceiroRepository.registrar(movimentacao)
@@ -115,14 +122,15 @@ class FinanceiroController {
         val responsavel = readln()
         val valor = lerDoubleSeguro("Valor") ?: return
 
-        val movimentacao = MovimentacaoFinanceira(
-            valor = valor,
-            pagador = pagador,
-            recebedor = recebedor,
-            motivo = motivo,
-            responsavel = responsavel,
-            tipo = TipoMovimentacao.ENTRADA
-        )
+        val movimentacao =
+            MovimentacaoFinanceira(
+                valor = valor,
+                pagador = pagador,
+                recebedor = recebedor,
+                motivo = motivo,
+                responsavel = responsavel,
+                tipo = TipoMovimentacao.ENTRADA,
+            )
 
         try {
             val id = FinanceiroRepository.registrar(movimentacao)
@@ -145,8 +153,8 @@ class FinanceiroController {
         movimentacoes.forEach {
             println(
                 "ID: ${it.id} | ${it.tipo} | R$ ${it.valor} | " +
-                "${it.motivo} | Pagador: ${it.pagador} | Recebedor: ${it.recebedor} | " +
-                "Resp: ${it.responsavel} | ${it.dataHora}"
+                    "${it.motivo} | Pagador: ${it.pagador} | Recebedor: ${it.recebedor} | " +
+                    "Resp: ${it.responsavel} | ${it.dataHora}"
             )
         }
     }

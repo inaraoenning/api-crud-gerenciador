@@ -9,7 +9,8 @@ import model.ItemVenda
 import model.MovimentacaoFinanceira
 import model.TipoMovimentacao
 import model.Venda
-import pessoas.pessoa.PessoaRepository
+import pessoas.PessoaRepository
+import servico.ServicoRepository
 import utils.Logger
 
 // Controller da frente de caixa.
@@ -38,7 +39,8 @@ class VendaController {
     // Menu para montar uma venda: escolhe funcionario, cliente e itens.
     private fun realizarVenda() {
         println("Funcionarios disponiveis:")
-        val funcionarios = PessoaRepository.getInstancia().listarAtivos().filterIsInstance<Funcionario>()
+        val funcionarios =
+            PessoaRepository.getInstancia().listarAtivos().filterIsInstance<Funcionario>()
         if (funcionarios.isEmpty()) {
             println("Nenhum funcionario cadastrado. Cadastre um funcionario antes de vender.")
             return
@@ -70,12 +72,13 @@ class VendaController {
         }
 
         val total = itens.sumOf { it.valorTotal }
-        val venda = Venda(
-            funcionarioId = funcionarioId,
-            clienteId = clienteId,
-            valorTotal = total,
-            itens = itens
-        )
+        val venda =
+            Venda(
+                funcionarioId = funcionarioId,
+                clienteId = clienteId,
+                valorTotal = total,
+                itens = itens,
+            )
 
         try {
             val vendaId = VendaRepository.inserir(venda)
@@ -88,7 +91,7 @@ class VendaController {
                     recebedor = "Empresa",
                     motivo = "Venda ID $vendaId",
                     responsavel = funcionarios.first { it.id == funcionarioId }.nome,
-                    tipo = TipoMovimentacao.ENTRADA
+                    tipo = TipoMovimentacao.ENTRADA,
                 )
             )
 
@@ -152,7 +155,7 @@ class VendaController {
                 caixaDaguaId = caixa.id,
                 quantidade = qtd,
                 precoUnitario = caixa.preco,
-                valorTotal = qtd * caixa.preco
+                valorTotal = qtd * caixa.preco,
             )
         )
         println("Item adicionado: ${caixa.nome} x$qtd")
@@ -160,15 +163,13 @@ class VendaController {
 
     // Adiciona um servico na venda.
     private fun adicionarItemServico(itens: MutableList<ItemVenda>) {
-        val servicos = servico.ServicoRepository.listar()
+        val servicos = ServicoRepository.listar()
         if (servicos.isEmpty()) {
             println("Nenhum servico cadastrado.")
             return
         }
 
-        servicos.forEach {
-            println("${it.id} - ${it.nome} | Preco: R$ ${it.preco}")
-        }
+        servicos.forEach { println("${it.id} - ${it.nome} | Preco: R$ ${it.preco}") }
 
         val id = lerInteiroSeguro("ID do servico") ?: return
         val servico = servicos.find { it.id == id }
@@ -188,7 +189,7 @@ class VendaController {
                 servicoId = servico.id,
                 quantidade = qtd,
                 precoUnitario = servico.preco,
-                valorTotal = qtd * servico.preco
+                valorTotal = qtd * servico.preco,
             )
         )
         println("Item adicionado: ${servico.nome} x$qtd")
@@ -221,7 +222,7 @@ class VendaController {
                         recebedor = "Cliente",
                         motivo = "Estorno da venda ID $id",
                         responsavel = "Sistema",
-                        tipo = TipoMovimentacao.SAIDA
+                        tipo = TipoMovimentacao.SAIDA,
                     )
                 )
                 println("Venda estornada com sucesso!")
@@ -244,8 +245,10 @@ class VendaController {
         }
 
         vendas.forEach {
-            println("ID: ${it.id} | Funcionario: ${it.funcionarioId} | Cliente: ${it.clienteId} | " +
-                    "Data: ${it.dataHora} | Total: R$ ${it.valorTotal}")
+            println(
+                "ID: ${it.id} | Funcionario: ${it.funcionarioId} | Cliente: ${it.clienteId} | " +
+                    "Data: ${it.dataHora} | Total: R$ ${it.valorTotal}"
+            )
         }
 
         print("Digite o ID para ver detalhes (ou Enter para voltar): ")
@@ -255,12 +258,15 @@ class VendaController {
             if (venda != null) {
                 println("\nDetalhes da venda ${venda.id}:")
                 venda.itens.forEach { item ->
-                    val tipo = when {
-                        item.caixaDaguaId != null -> "Produto ID ${item.caixaDaguaId}"
-                        item.servicoId != null -> "Servico ID ${item.servicoId}"
-                        else -> "Item desconhecido"
-                    }
-                    println("  $tipo | Qtd: ${item.quantidade} | Unit: R$ ${item.precoUnitario} | Total: R$ ${item.valorTotal}")
+                    val tipo =
+                        when {
+                            item.caixaDaguaId != null -> "Produto ID ${item.caixaDaguaId}"
+                            item.servicoId != null -> "Servico ID ${item.servicoId}"
+                            else -> "Item desconhecido"
+                        }
+                    println(
+                        "  $tipo | Qtd: ${item.quantidade} | Unit: R$ ${item.precoUnitario} | Total: R$ ${item.valorTotal}"
+                    )
                 }
             } else {
                 println("Venda nao encontrada.")

@@ -3,9 +3,9 @@ package caixadaagua
 import database.DbConnection
 import enums.Formato
 import enums.Material
-import model.CaixaDagua
 import java.sql.PreparedStatement
 import java.sql.ResultSet
+import model.CaixaDagua
 
 // Classe que faz a ponte entre o programa e a tabela CAIXA_DA_AGUA do banco.
 // Aqui ficam as operacoes de CRUD: inserir, listar, buscar, atualizar e deletar.
@@ -29,7 +29,7 @@ object CaixaDaAguaRepository {
             preco = rs.getDouble("preco"),
             quantidade = rs.getInt("quantidade"),
             fornecedorId = rs.getInt("fornecedor_id"),
-            nomeFornecedor = rs.getString("nome_fornecedor") ?: ""
+            nomeFornecedor = rs.getString("nome_fornecedor") ?: "",
         )
     }
 
@@ -53,12 +53,14 @@ object CaixaDaAguaRepository {
 
     // Cadastra uma nova caixa d'agua no banco e devolve o ID gerado.
     fun inserir(caixa: CaixaDagua): Int {
-        val sql = """
+        val sql =
+            """
             INSERT INTO CAIXA_DA_AGUA (
                 nome, marca, modelo, capacidade_litros, largura, altura,
                 profundidade, cor, material, formato, preco, quantidade, fornecedor_id
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """.trimIndent()
+            """
+                .trimIndent()
 
         DbConnection.conectar().use { conn ->
             conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS).use { stmt ->
@@ -74,11 +76,13 @@ object CaixaDaAguaRepository {
 
     // Lista todas as caixas d'agua cadastradas.
     fun listar(): List<CaixaDagua> {
-        val sql = """
+        val sql =
+            """
             SELECT c.*, fr.razao_social as nome_fornecedor
             FROM CAIXA_DA_AGUA c
             LEFT JOIN FORNECEDOR fr ON fr.id = c.fornecedor_id
-        """.trimIndent()
+            """
+                .trimIndent()
 
         val caixas = mutableListOf<CaixaDagua>()
         DbConnection.conectar().use { conn ->
@@ -94,12 +98,14 @@ object CaixaDaAguaRepository {
 
     // Busca uma caixa d'agua pelo ID. Retorna null se nao encontrar.
     fun buscarPorId(id: Int): CaixaDagua? {
-        val sql = """
+        val sql =
+            """
             SELECT c.*, fr.razao_social as nome_fornecedor
             FROM CAIXA_DA_AGUA c
             LEFT JOIN FORNECEDOR fr ON fr.id = c.fornecedor_id
             WHERE c.id = ?
-        """.trimIndent()
+            """
+                .trimIndent()
 
         DbConnection.conectar().use { conn ->
             conn.prepareStatement(sql).use { stmt ->
@@ -112,13 +118,15 @@ object CaixaDaAguaRepository {
 
     // Atualiza os dados de uma caixa d'agua existente.
     fun atualizar(caixa: CaixaDagua): Boolean {
-        val sql = """
+        val sql =
+            """
             UPDATE CAIXA_DA_AGUA SET
                 nome = ?, marca = ?, modelo = ?, capacidade_litros = ?, largura = ?,
                 altura = ?, profundidade = ?, cor = ?, material = ?, formato = ?,
                 preco = ?, quantidade = ?, fornecedor_id = ?
             WHERE id = ?
-        """.trimIndent()
+            """
+                .trimIndent()
 
         DbConnection.conectar().use { conn ->
             conn.prepareStatement(sql).use { stmt ->

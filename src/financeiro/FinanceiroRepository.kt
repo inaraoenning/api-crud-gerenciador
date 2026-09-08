@@ -1,11 +1,11 @@
 package financeiro
 
 import database.DbConnection
-import model.MovimentacaoFinanceira
-import model.TipoMovimentacao
 import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.Timestamp
+import model.MovimentacaoFinanceira
+import model.TipoMovimentacao
 
 // Repository do modulo financeiro.
 // Registra entradas e saidas de dinheiro no caixa, como vendas, compras e pagamento de salarios.
@@ -20,17 +20,19 @@ object FinanceiroRepository {
             dataHora = rs.getTimestamp("data_hora").toLocalDateTime(),
             motivo = rs.getString("motivo"),
             responsavel = rs.getString("responsavel"),
-            tipo = TipoMovimentacao.valueOf(rs.getString("tipo"))
+            tipo = TipoMovimentacao.valueOf(rs.getString("tipo")),
         )
     }
 
     // Registra uma nova movimentacao financeira e retorna o ID gerado.
     fun registrar(mov: MovimentacaoFinanceira): Int {
-        val sql = """
+        val sql =
+            """
             INSERT INTO MOVIMENTACAO_FINANCEIRA (
                 valor, pagador, recebedor, data_hora, motivo, responsavel, tipo
             ) VALUES (?, ?, ?, ?, ?, ?, ?)
-        """.trimIndent()
+            """
+                .trimIndent()
 
         DbConnection.conectar().use { conn ->
             conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS).use { stmt ->
@@ -69,12 +71,14 @@ object FinanceiroRepository {
 
     // Calcula o saldo do caixa somando entradas e subtraindo saidas.
     fun calcularSaldo(): Double {
-        val sql = """
+        val sql =
+            """
             SELECT
                 COALESCE(SUM(CASE WHEN tipo = 'ENTRADA' THEN valor ELSE 0 END), 0) as entradas,
                 COALESCE(SUM(CASE WHEN tipo = 'SAIDA' THEN valor ELSE 0 END), 0) as saidas
             FROM MOVIMENTACAO_FINANCEIRA
-        """.trimIndent()
+            """
+                .trimIndent()
 
         DbConnection.conectar().use { conn ->
             conn.prepareStatement(sql).use { stmt ->
