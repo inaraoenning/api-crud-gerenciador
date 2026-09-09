@@ -30,7 +30,6 @@ object CaixaDaAguaRepository {
             preco = rs.getDouble("preco"),
             quantidade = rs.getInt("quantidade"),
             fornecedorId = rs.getInt("fornecedor_id"),
-            nomeFornecedor = rs.getString("nome_fornecedor") ?: "",
         )
     }
 

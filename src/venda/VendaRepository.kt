@@ -51,6 +51,8 @@ object VendaRepository {
             """
                 .trimIndent()
 
+        val sqlQtd = "SELECT quantidade FROM CAIXA_DA_AGUA WHERE id = ? FOR UPDATE"
+
         val sqlAtualizaEstoque = "UPDATE CAIXA_DA_AGUA SET quantidade = quantidade - ? WHERE id = ?"
 
         DbConnection.conectar().use { conn ->
@@ -80,6 +82,21 @@ object VendaRepository {
                         stmt.setDouble(5, item.precoUnitario)
                         stmt.setDouble(6, item.valorTotal)
                         stmt.addBatch()
+
+                        if (item.caixaDaguaId != null) {
+                            conn.prepareStatement(sqlQtd).use { qtdStmt ->
+                                qtdStmt.setInt(1, item.caixaDaguaId)
+                                val rs = qtdStmt.executeQuery()
+                                if (rs.next()) {
+                                    val qtd = rs.getInt(1)
+                                    if (qtd < item.quantidade) {
+                                        throw Exception(
+                                            "Estoque insuficiente para o produto ${item.caixaDaguaId}"
+                                        )
+                                    }
+                                }
+                            }
+                        }
 
                         // Se o item for um produto, diminui do estoque.
                         if (item.caixaDaguaId != null) {
