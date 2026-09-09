@@ -4,8 +4,11 @@ import enums.CorCaixa
 import enums.Formato
 import enums.MarcaCaixa
 import enums.Material
+import financeiro.FinanceiroRepository
 import model.CaixaDagua
 import model.Fornecedor
+import model.MovimentacaoFinanceira
+import model.TipoMovimentacao
 import pessoas.PessoaRepository
 import utils.lerDoubleSeguro
 import utils.lerInteiroSeguro
@@ -43,20 +46,47 @@ class CaixaDaAguaController {
             return
         }
 
-        println("--- ESTOQUE ---")
-        println("ID |  MARCA |  MODELO  |  CAPACIDADE  |  QTD  |  PREÇO  |  FORNECEDOR ")
+        println("------------------------------ ESTOQUE ------------------------------")
+        println(
+            "ID | MARCA   |  MODELO              |  CAPACIDADE   |  QTD  |  PREÇO  |  FORNECEDOR "
+        )
         caixas.forEach {
             println(
-                "${it.id}  |  ${it.marca}|  ${it.modelo}  |  ${it.capacidadeLitros}  |  ${it.quantidade}  |  R$${it.preco}  |  ${it.nomeFornecedor}"
+                "${it.id}    | ${it.marca}|  ${it.modelo}  |  ${it.capacidadeLitros}L  |  ${it.quantidade}  |  R$${it.preco}  |  ${it.fornecedorId}"
             )
         }
     }
 
     // Le do usuario os dados de uma nova caixa e manda salvar no banco.
+    // Tambem registra a saida no caixa referente a compra do estoque.
     private fun adicionarCaixa() {
         val caixa = lerDadosCaixa() ?: return
+
+        val valorCompra = lerDoubleSeguro("Valor total da compra") ?: return
+
+        if (!FinanceiroRepository.temSaldo(valorCompra)) {
+            println("Saldo insuficiente para comprar o estoque.")
+            return
+        }
+
         val id = CaixaDaAguaRepository.inserir(caixa)
-        println("Caixa cadastrada com sucesso! ID: $id")
+
+        val movimentacao =
+            MovimentacaoFinanceira(
+                valor = valorCompra,
+                pagador = "Empresa",
+                recebedor = "Fornecedor ID ${caixa.fornecedorId}",
+                motivo = "Compra de estoque - Caixa ID $id",
+                responsavel = "Setor Financeiro",
+                tipo = TipoMovimentacao.SAIDA,
+            )
+
+        try {
+            FinanceiroRepository.registrar(movimentacao)
+            println("Caixa cadastrada e compra registrada no caixa! ID: $id")
+        } catch (e: Exception) {
+            println("Caixa cadastrada, mas houve erro ao registrar a movimentacao: ${e.message}")
+        }
     }
 
     // Permite alterar uma caixa existente, buscando pelo ID.

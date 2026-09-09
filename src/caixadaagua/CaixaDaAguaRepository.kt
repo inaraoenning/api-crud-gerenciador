@@ -78,9 +78,10 @@ object CaixaDaAguaRepository {
     fun listar(): List<CaixaDagua> {
         val sql =
             """
-            SELECT c.*, fr.razao_social as nome_fornecedor
+            SELECT c.*
             FROM CAIXA_DA_AGUA c
             LEFT JOIN FORNECEDOR fr ON fr.pessoa_id = c.fornecedor_id
+
             """
                 .trimIndent()
 
@@ -100,7 +101,7 @@ object CaixaDaAguaRepository {
     fun buscarPorId(id: Int): CaixaDagua? {
         val sql =
             """
-            SELECT c.*, fr.razao_social as nome_fornecedor
+            SELECT c.*
             FROM CAIXA_DA_AGUA c
             LEFT JOIN FORNECEDOR fr ON fr.pessoa_id = c.fornecedor_id
             WHERE c.id = ?
