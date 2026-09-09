@@ -29,7 +29,7 @@ class ClienteController(private val repositorio: PessoaRepository) {
     private fun cadastrarCliente() {
         val dados = lerDadosComunsPessoa(repositorio)
 
-        val limiteCredito = lerDoubleSeguro("Limite de Credito") ?: 0.0
+        val limiteCredito = lerDoubleSeguro("Limite de Credito")
 
         val cliente =
             Cliente(

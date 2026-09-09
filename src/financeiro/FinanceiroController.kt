@@ -93,7 +93,7 @@ class FinanceiroController {
         val recebedor = readln()
         print("Responsavel: ")
         val responsavel = readln()
-        val valor = lerDoubleSeguro("Valor") ?: return
+        val valor = lerDoubleSeguro("Valor")
 
         val movimentacao =
             MovimentacaoFinanceira(
@@ -125,7 +125,7 @@ class FinanceiroController {
         val recebedor = readln()
         print("Responsavel: ")
         val responsavel = readln()
-        val valor = lerDoubleSeguro("Valor") ?: return
+        val valor = lerDoubleSeguro("Valor")
 
         val movimentacao =
             MovimentacaoFinanceira(

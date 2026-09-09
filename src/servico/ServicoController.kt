@@ -1,8 +1,8 @@
 package servico
 
+import model.Servico
 import utils.lerDoubleSeguro
 import utils.lerInteiroSeguro
-import model.Servico
 
 // Controller do modulo de Servicos.
 // Exibe o menu e le os dados do usuario para cadastrar, listar,
@@ -35,7 +35,7 @@ class ServicoController {
         val nome = readln()
         print("Descricao: ")
         val descricao = readln()
-        val preco = lerDoubleSeguro("Preco") ?: return
+        val preco = lerDoubleSeguro("Preco")
 
         val servico = Servico(id = 0, nome = nome, descricao = descricao, preco = preco)
         val id = ServicoRepository.inserir(servico)
@@ -49,9 +49,7 @@ class ServicoController {
             return
         }
 
-        servicos.forEach {
-            println("ID: ${it.id} | ${it.nome} | R$ ${it.preco} | ${it.descricao}")
-        }
+        servicos.forEach { println("ID: ${it.id} | ${it.nome} | R$ ${it.preco} | ${it.descricao}") }
     }
 
     private fun editar() {

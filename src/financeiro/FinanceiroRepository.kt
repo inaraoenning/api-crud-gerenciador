@@ -69,7 +69,8 @@ object FinanceiroRepository {
         return movimentacoes
     }
 
-    // Verifica se o caixa tem saldo suficiente para pagar um determinado valor.
+    // Encapsulamento: a regra de negocio "nao deixa o saldo ficar negativo"
+    // fica aqui, dentro do repository, e nao espalhada pelos controllers.
     fun temSaldo(valor: Double): Boolean {
         return calcularSaldo() >= valor
     }

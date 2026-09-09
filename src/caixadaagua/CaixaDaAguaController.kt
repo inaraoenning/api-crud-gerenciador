@@ -62,7 +62,7 @@ class CaixaDaAguaController {
     private fun adicionarCaixa() {
         val caixa = lerDadosCaixa() ?: return
 
-        val valorCompra = lerDoubleSeguro("Valor total da compra") ?: return
+        val valorCompra = lerDoubleSeguro("Valor total da compra")
 
         if (!FinanceiroRepository.temSaldo(valorCompra)) {
             println("Saldo insuficiente para comprar o estoque.")
@@ -161,9 +161,9 @@ class CaixaDaAguaController {
 
         val capacidade = lerInteiroSeguro("Capacidade (litros)") ?: return null
         val modelo = "Caixa d' agua ${marca.name} ${capacidade}L"
-        val largura = lerDoubleSeguro("Largura") ?: return null
-        val altura = lerDoubleSeguro("Altura") ?: return null
-        val profundidade = lerDoubleSeguro("Profundidade") ?: return null
+        val largura = lerDoubleSeguro("Largura")
+        val altura = lerDoubleSeguro("Altura")
+        val profundidade = lerDoubleSeguro("Profundidade")
 
         println("Cor: 1-Azul 2-Bege 3-Preta")
         val cor =
@@ -202,7 +202,7 @@ class CaixaDaAguaController {
                 }
             }
 
-        val preco = lerDoubleSeguro("Preco") ?: return null
+        val preco = lerDoubleSeguro("Preco")
         val quantidade = lerInteiroSeguro("Quantidade em estoque") ?: return null
 
         return CaixaDagua(

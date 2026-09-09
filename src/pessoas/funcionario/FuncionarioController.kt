@@ -43,7 +43,7 @@ class FuncionarioController(private val repositorio: PessoaRepository) {
                 }
             }
 
-        val salario = lerDoubleSeguro("Salario") ?: return
+        val salario = lerDoubleSeguro("Salario")
 
         val funcionario =
             Funcionario(

@@ -35,7 +35,10 @@ object VendaRepository {
         )
     }
 
-    // Cria uma venda completa com seus itens, atualiza o estoque e retorna o ID da venda.
+    // Cria uma venda completa com seus itens e atualiza o estoque.
+    // Usa transacao (autoCommit false) para garantir que, se algo der errado,
+    // o rollback desfaz tudo e os dados nao ficam inconsistentes.
+    // FOR UPDATE trava a linha do estoque durante a venda, evitando condicao de corrida.
     fun inserir(venda: Venda): Int {
         val sqlVenda =
             """

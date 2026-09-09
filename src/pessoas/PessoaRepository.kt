@@ -25,6 +25,9 @@ class PessoaRepository private constructor(val dbConnection: DbConnection) {
         }
     }
 
+    // Metodo que aplica polimorfismo: o retorno eh Pessoa, mas o objeto criado pode ser
+    // Funcionario, Cliente ou Fornecedor, dependendo do valor da coluna 'tipo' no banco.
+    // O mesmo metodo se comporta diferente conforme o dado que chega do banco.
     private fun mapearPessoa(rs: ResultSet): Pessoa {
         val id = rs.getInt("id")
         val nome = rs.getString("nome")
@@ -33,7 +36,7 @@ class PessoaRepository private constructor(val dbConnection: DbConnection) {
         val tipo = rs.getString("tipo")
         val ativo = rs.getBoolean("ativo")
 
-        // Cria o objeto especifico de cada tipo, passando o ativo corretamente.
+        // Cria o objeto especifico de cada tipo (polimorfismo).
         return when (TipoPessoa.valueOf(tipo)) {
             TipoPessoa.FUNCIONARIO -> {
                 val setor = rs.getString("setor") ?: Setor.FINANCEIRO.name
