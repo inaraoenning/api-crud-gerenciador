@@ -104,3 +104,36 @@ CREATE TABLE IF NOT EXISTS LOG_SISTEMA (
     mensagem TEXT NOT NULL,
     data_hora TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Dados de teste (1 registro em cada tabela)
+INSERT INTO PESSOA (nome, cpf_cnpj, telefone, tipo, ativo) VALUES
+('Joao Silva', '12345678901', '(11) 98765-4321', 'FUNCIONARIO', TRUE),
+('Maria Souza', '98765432100', '(11) 91234-5678', 'CLIENTE', TRUE),
+('Distribuidora Fortlev', '12345678901234', '(11) 3333-4444', 'FORNECEDOR', TRUE);
+
+INSERT INTO FUNCIONARIO (pessoa_id, salario, setor) VALUES
+(1, 3500.00, 'FINANCEIRO');
+
+INSERT INTO CLIENTE (pessoa_id, limite_credito) VALUES
+(2, 1500.00);
+
+INSERT INTO FORNECEDOR (pessoa_id, razao_social, marca) VALUES
+(3, 'Distribuidora Fortlev LTDA', 'Fortlev');
+
+INSERT INTO CAIXA_DA_AGUA (marca, modelo, capacidade_litros, largura, altura, profundidade, cor, material, formato, preco, quantidade, fornecedor_id) VALUES
+('Fortlev', 'Caixa d agua Fortlev 1000L', 1000, 120.00, 150.00, 120.00, 'Azul', 'POLIETILENO', 'Cilindrico', 450.00, 10, 3);
+
+INSERT INTO SERVICO (nome, descricao, preco) VALUES
+('Instalacao de caixa d agua', 'Instalacao completa com mao de obra', 150.00);
+
+INSERT INTO VENDA (funcionario_id, cliente_id, data_hora, valor_total) VALUES
+(1, 2, CURRENT_TIMESTAMP, 450.00);
+
+INSERT INTO VENDA_ITEM (venda_id, caixa_da_agua_id, servico_id, quantidade, preco_unitario, valor_total) VALUES
+(1, 1, NULL, 1, 450.00, 450.00);
+
+INSERT INTO MOVIMENTACAO_FINANCEIRA (valor, pagador, recebedor, data_hora, motivo, responsavel, tipo) VALUES
+(450.00, 'Maria Souza', 'Empresa', CURRENT_TIMESTAMP, 'Venda ID 1', 'Joao Silva', 'ENTRADA');
+
+INSERT INTO LOG_SISTEMA (nivel, mensagem) VALUES
+('INFO', 'Sistema inicializado com dados de teste.');
