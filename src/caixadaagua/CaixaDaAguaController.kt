@@ -2,8 +2,11 @@ package caixadaagua
 
 import enums.CorCaixa
 import enums.Formato
+import enums.MarcaCaixa
 import enums.Material
 import model.CaixaDagua
+import model.Fornecedor
+import pessoas.PessoaRepository
 import utils.lerDoubleSeguro
 import utils.lerInteiroSeguro
 
@@ -40,11 +43,11 @@ class CaixaDaAguaController {
             return
         }
 
+        println("--- ESTOQUE ---")
+        println("ID |  MARCA |  MODELO  |  CAPACIDADE  |  QTD  |  PREÇO  |  FORNECEDOR ")
         caixas.forEach {
             println(
-                "ID: ${it.id} | Marca: ${it.marca} | Modelo: ${it.modelo} | " +
-                    "Capacidade: ${it.capacidadeLitros}L | Preco: R$ ${it.preco} | " +
-                    "Qtd: ${it.quantidade} | Fornecedor: ${it.nomeFornecedor}"
+                "${it.id}  |  ${it.marca}|  ${it.modelo}  |  ${it.capacidadeLitros}  |  ${it.quantidade}  |  R$${it.preco}  |  ${it.nomeFornecedor}"
             )
         }
     }
@@ -68,9 +71,11 @@ class CaixaDaAguaController {
 
         println("Deixe em branco para manter o valor atual.")
 
-        val marca = lerStringOuPadrao("Marca", caixaAtual.marca)
-        val modelo = lerStringOuPadrao("Modelo", caixaAtual.modelo)
+        val marca = lerMarcaOuPadrao(caixaAtual.marca)
+        val fornecedorId = buscarFornecedorPorMarca(marca) ?: return
+
         val capacidade = lerInteiroOuPadrao("Capacidade (litros)", caixaAtual.capacidadeLitros)
+        val modelo = "Caixa d' agua ${marca.name} ${capacidade}L"
         val largura = lerDoubleOuPadrao("Largura", caixaAtual.largura)
         val altura = lerDoubleOuPadrao("Altura", caixaAtual.altura)
         val profundidade = lerDoubleOuPadrao("Profundidade", caixaAtual.profundidade)
@@ -79,7 +84,6 @@ class CaixaDaAguaController {
         val formato = lerFormatoOuPadrao(caixaAtual.formato)
         val preco = lerDoubleOuPadrao("Preco", caixaAtual.preco)
         val quantidade = lerInteiroOuPadrao("Quantidade", caixaAtual.quantidade)
-        val fornecedorId = lerInteiroOuPadrao("ID do fornecedor", caixaAtual.fornecedorId)
 
         val caixaAtualizada =
             caixaAtual.copy(
@@ -111,12 +115,22 @@ class CaixaDaAguaController {
     // Le todos os dados de uma caixa d'agua nova.
     // Se o usuario digitar algo errado, retorna null e cancela a operacao.
     private fun lerDadosCaixa(): CaixaDagua? {
-        print("Marca: ")
-        val marca = readln()
-        print("Modelo: ")
-        val modelo = readln()
+        println("Marca: 1-Fortlev 2-Aqualimp 3-Tigre")
+        val marca =
+            when (readln()) {
+                "1" -> MarcaCaixa.Fortlev
+                "2" -> MarcaCaixa.Aqualimp
+                "3" -> MarcaCaixa.Tigre
+                else -> {
+                    println("Marca invalida.")
+                    return null
+                }
+            }
+
+        val fornecedorId = buscarFornecedorPorMarca(marca) ?: return null
 
         val capacidade = lerInteiroSeguro("Capacidade (litros)") ?: return null
+        val modelo = "Caixa d' agua ${marca.name} ${capacidade}L"
         val largura = lerDoubleSeguro("Largura") ?: return null
         val altura = lerDoubleSeguro("Altura") ?: return null
         val profundidade = lerDoubleSeguro("Profundidade") ?: return null
@@ -160,7 +174,6 @@ class CaixaDaAguaController {
 
         val preco = lerDoubleSeguro("Preco") ?: return null
         val quantidade = lerInteiroSeguro("Quantidade em estoque") ?: return null
-        val fornecedorId = lerInteiroSeguro("ID do fornecedor") ?: return null
 
         return CaixaDagua(
             id = 0, // ID sera gerado pelo banco
@@ -233,6 +246,53 @@ class CaixaDaAguaController {
             "" -> padrao
             else -> {
                 println("Cor mantida como padrao.")
+                padrao
+            }
+        }
+    }
+
+    // Busca fornecedores ativos que vendam a marca escolhida.
+    // Se houver so um, retorna o ID dele. Se houver varios, mostra para escolher.
+    private fun buscarFornecedorPorMarca(marca: MarcaCaixa): Int? {
+        val fornecedores =
+            PessoaRepository.getInstancia().listarAtivos().filterIsInstance<Fornecedor>().filter {
+                it.marca == marca
+            }
+
+        if (fornecedores.isEmpty()) {
+            println("Nenhum fornecedor ativo encontrado para a marca $marca.")
+            return null
+        }
+
+        if (fornecedores.size == 1) {
+            val fornecedor = fornecedores.first()
+            println("Fornecedor selecionado automaticamente: ${fornecedor.nome}")
+            return fornecedor.id
+        }
+
+        println("Fornecedores disponiveis para a marca $marca:")
+        fornecedores.forEach { println("${it.id} - ${it.nome}") }
+
+        val id = lerInteiroSeguro("ID do fornecedor") ?: return null
+        val escolhido = fornecedores.find { it.id == id }
+
+        if (escolhido == null) {
+            println("Fornecedor invalido.")
+            return null
+        }
+
+        return escolhido.id
+    }
+
+    private fun lerMarcaOuPadrao(padrao: MarcaCaixa): MarcaCaixa {
+        println("Marca [${padrao.name}]: 1-Fortlev 2-Aqualimp 3-Tigre")
+        return when (readln()) {
+            "1" -> MarcaCaixa.Fortlev
+            "2" -> MarcaCaixa.Aqualimp
+            "3" -> MarcaCaixa.Tigre
+            "" -> padrao
+            else -> {
+                println("Marca mantida como padrao.")
                 padrao
             }
         }

@@ -1,6 +1,7 @@
 package pessoas
 
 import database.DbConnection
+import enums.MarcaCaixa
 import enums.Setor
 import java.math.BigDecimal
 import java.sql.PreparedStatement
@@ -47,14 +48,18 @@ class PessoaRepository private constructor(val dbConnection: DbConnection) {
                     )
                     .apply { this.ativo = ativo }
             }
-            TipoPessoa.FORNECEDOR ->
+            TipoPessoa.FORNECEDOR -> {
+                val razaoSocial = rs.getString("razao_social")
                 Fornecedor(
                         idFornecedor = id,
                         nomeFornecedor = nome,
+                        razaoFornecedor = razaoSocial,
                         documentoFornecedor = documento,
                         telefoneFornecedor = telefone,
+                        marca = MarcaCaixa.valueOf(rs.getString("marca") ?: MarcaCaixa.Fortlev.name),
                     )
                     .apply { this.ativo = ativo }
+            }
             TipoPessoa.CLIENTE ->
                 Cliente(
                         idCliente = id,
@@ -85,6 +90,7 @@ class PessoaRepository private constructor(val dbConnection: DbConnection) {
         setor: String? = null,
         limiteCredito: Double = 0.0,
         razaoSocial: String? = null,
+        marca: MarcaCaixa? = null,
     ): Boolean {
         // Verifica se o CPF/CNPJ ja existe no banco antes de cadastrar.
         if (documentoJaExiste(pessoa.documento)) {
@@ -134,10 +140,12 @@ class PessoaRepository private constructor(val dbConnection: DbConnection) {
                         }
                     }
                     TipoPessoa.FORNECEDOR -> {
-                        val sql = "INSERT INTO FORNECEDOR (pessoa_id, razao_social) VALUES (?, ?)"
+                        val sql =
+                            "INSERT INTO FORNECEDOR (pessoa_id, razao_social, marca) VALUES (?, ?, ?)"
                         conn.prepareStatement(sql).use {
                             it.setInt(1, pessoaId)
                             it.setString(2, razaoSocial ?: pessoa.nome)
+                            it.setString(3, marca?.name ?: MarcaCaixa.Fortlev.name)
                             it.executeUpdate()
                         }
                     }
@@ -153,7 +161,7 @@ class PessoaRepository private constructor(val dbConnection: DbConnection) {
         val pessoas = mutableListOf<Pessoa>()
         val sql =
             """
-            SELECT p.*, f.setor, f.salario, c.limite_credito, fn.razao_social
+            SELECT p.*, f.setor, f.salario, c.limite_credito, fn.razao_social, fn.marca
             FROM PESSOA p
             LEFT JOIN FUNCIONARIO f ON f.pessoa_id = p.id
             LEFT JOIN CLIENTE c ON c.pessoa_id = p.id
@@ -176,7 +184,7 @@ class PessoaRepository private constructor(val dbConnection: DbConnection) {
     fun buscarPorId(id: Int): Pessoa? {
         val sql =
             """
-            SELECT p.*, f.setor, f.salario, c.limite_credito, fn.razao_social
+            SELECT p.*, f.setor, f.salario, c.limite_credito, fn.razao_social, fn.marca
             FROM PESSOA p
             LEFT JOIN FUNCIONARIO f ON f.pessoa_id = p.id
             LEFT JOIN CLIENTE c ON c.pessoa_id = p.id
@@ -198,7 +206,7 @@ class PessoaRepository private constructor(val dbConnection: DbConnection) {
         val pessoasAtivas = mutableListOf<Pessoa>()
         val sql =
             """
-            SELECT p.*, f.setor, f.salario, c.limite_credito, fn.razao_social
+            SELECT p.*, f.setor, f.salario, c.limite_credito, fn.razao_social, fn.marca
             FROM PESSOA p
             LEFT JOIN FUNCIONARIO f ON f.pessoa_id = p.id
             LEFT JOIN CLIENTE c ON c.pessoa_id = p.id

@@ -69,6 +69,11 @@ object FinanceiroRepository {
         return movimentacoes
     }
 
+    // Verifica se o caixa tem saldo suficiente para pagar um determinado valor.
+    fun temSaldo(valor: Double): Boolean {
+        return calcularSaldo() >= valor
+    }
+
     // Calcula o saldo do caixa somando entradas e subtraindo saidas.
     fun calcularSaldo(): Double {
         val sql =

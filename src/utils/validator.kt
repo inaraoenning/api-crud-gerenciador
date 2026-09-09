@@ -13,7 +13,8 @@ object Validador {
     }
 
     fun razaoSocialValida(razaoSocial: String): Boolean {
-        // Permite letras (com e sem acento), números, espaços, apóstrofo ('), hífen (-), ponto (.) e comercial (&)
+        // Permite letras (com e sem acento), números, espaços, apóstrofo ('), hífen (-), ponto (.)
+        // e comercial (&)
         val regex = Regex("^[a-zA-Z0-9À-ÿ'\\s.\\-/&]+$")
         return razaoSocial.isNotBlank() && regex.matches(razaoSocial)
     }
@@ -29,12 +30,15 @@ fun lerInteiroSeguro(label: String): Int? {
     }
 }
 
+// Valida se o valor é nulo, não aceita valor negativo e usa while para continuar na função até
+// inserir o valor correto
 fun lerDoubleSeguro(label: String): Double? {
-    print("$label: ")
-    return try {
-        readln().toDoubleOrNull()
-    } catch (e: NumberFormatException) {
+    while (true) {
+        print("$label: ")
+        val valor = readln().toDoubleOrNull()
+        if (valor != null && valor > 0) {
+            return valor
+        }
         println("Valor invalido.")
-        null
     }
 }

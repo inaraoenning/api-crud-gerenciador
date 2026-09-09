@@ -1,5 +1,6 @@
 package pessoas.fornecedor
 
+import enums.MarcaCaixa
 import model.Fornecedor
 import pessoas.PessoaRepository
 import pessoas.lerDadosComunsPessoa
@@ -35,29 +36,45 @@ class FornecedorController(private val repositorio: PessoaRepository) {
             razaoSocial = readln().ifBlank { dados.nome }
 
             if (Validador.razaoSocialValida(razaoSocial)) {
-                break // Sai do laço apenas quando a razão social for válida
+                break
             }
 
             println("Razão Social contém caracteres inválidos. Tente novamente.")
         }
 
-        // O cadastro e inserção devem ficar FORA do laço de validação:
+        println("Marca fornecida: 1-Fortlev 2-Aqualimp 3-Tigre")
+        val marca =
+            when (readln()) {
+                "1" -> MarcaCaixa.Fortlev
+                "2" -> MarcaCaixa.Aqualimp
+                "3" -> MarcaCaixa.Tigre
+                else -> {
+                    println("Marca invalida.")
+                    return
+                }
+            }
+
         val fornecedor =
             Fornecedor(
                 idFornecedor = 0,
                 nomeFornecedor = dados.nome,
+                razaoFornecedor = razaoSocial,
                 documentoFornecedor = dados.documento,
                 telefoneFornecedor = dados.telefone,
+                marca = marca,
             )
 
-        val ok = repositorio.inserir(fornecedor, razaoSocial = razaoSocial)
+        val ok = repositorio.inserir(fornecedor, razaoSocial = razaoSocial, marca = marca)
         println(if (ok) "Fornecedor cadastrado com sucesso!" else "Erro ao cadastrar fornecedor.")
     }
 
     private fun listar() {
+            println("--- Lista de Fornecedor ---")
+            println("ID |   NOME  |  RAZAO  |  DOCUMENTO  | TELEFONE  |")
         repositorio.listarAtivos().filterIsInstance<Fornecedor>().forEach {
-            println("${it.id} - ${it.nome} | Documento: ${it.documento} | Telefone: ${it.telefone}")
+            println("${it.id} | ${it.nome}  |  ${it.razaoFornecedor}  |  ${it.documento} |  ${it.telefone}")
         }
+        println("---------------------------")
     }
 
     private fun inativar() {

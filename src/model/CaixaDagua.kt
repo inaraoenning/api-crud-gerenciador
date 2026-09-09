@@ -2,13 +2,14 @@ package model
 
 import enums.CorCaixa
 import enums.Formato
+import enums.MarcaCaixa
 import enums.Material
 
 // Classe que representa uma caixa d'agua no estoque.
 // batem com as colunas do banco de dados.
 data class CaixaDagua(
     val id: Int,
-    val marca: String,
+    val marca: MarcaCaixa,
     val modelo: String,
     val capacidadeLitros: Int,
     val largura: Double,

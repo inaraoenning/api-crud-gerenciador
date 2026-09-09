@@ -1,12 +1,12 @@
 package financeiro
 
-import utils.lerDoubleSeguro
-import utils.lerInteiroSeguro
 import model.Funcionario
 import model.MovimentacaoFinanceira
 import model.TipoMovimentacao
 import pessoas.PessoaRepository
 import utils.Logger
+import utils.lerDoubleSeguro
+import utils.lerInteiroSeguro
 
 // Controller do modulo financeiro.
 // Aqui ficam as telas para pagamento de salarios, registro de compras/despesas
@@ -53,6 +53,11 @@ class FinanceiroController {
 
         if (funcionario == null) {
             println("Funcionario nao encontrado.")
+            return
+        }
+
+        if (!FinanceiroRepository.temSaldo(funcionario.salario.toDouble())) {
+            println("Saldo insuficiente para pagar o salario de R$ ${funcionario.salario}.")
             return
         }
 

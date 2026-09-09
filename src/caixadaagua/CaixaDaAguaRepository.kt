@@ -3,6 +3,7 @@ package caixadaagua
 import database.DbConnection
 import enums.CorCaixa
 import enums.Formato
+import enums.MarcaCaixa
 import enums.Material
 import java.sql.PreparedStatement
 import java.sql.ResultSet
@@ -17,7 +18,7 @@ object CaixaDaAguaRepository {
     private fun mapearCaixa(rs: ResultSet): CaixaDagua {
         return CaixaDagua(
             id = rs.getInt("id"),
-            marca = rs.getString("marca"),
+            marca = MarcaCaixa.valueOf(rs.getString("marca")),
             modelo = rs.getString("modelo"),
             capacidadeLitros = rs.getInt("capacidade_litros"),
             largura = rs.getDouble("largura"),
@@ -36,7 +37,7 @@ object CaixaDaAguaRepository {
     // Preenche os valores comuns de uma caixa d'agua num PreparedStatement,
     // tanto para inserir quanto para atualizar.
     private fun preencherStatement(stmt: PreparedStatement, caixa: CaixaDagua, inicio: Int) {
-        stmt.setString(inicio, caixa.marca)
+        stmt.setString(inicio, caixa.marca.name)
         stmt.setString(inicio + 1, caixa.modelo)
         stmt.setInt(inicio + 2, caixa.capacidadeLitros)
         stmt.setDouble(inicio + 3, caixa.largura)
@@ -79,7 +80,7 @@ object CaixaDaAguaRepository {
             """
             SELECT c.*, fr.razao_social as nome_fornecedor
             FROM CAIXA_DA_AGUA c
-            LEFT JOIN FORNECEDOR fr ON fr.id = c.fornecedor_id
+            LEFT JOIN FORNECEDOR fr ON fr.pessoa_id = c.fornecedor_id
             """
                 .trimIndent()
 
@@ -101,7 +102,7 @@ object CaixaDaAguaRepository {
             """
             SELECT c.*, fr.razao_social as nome_fornecedor
             FROM CAIXA_DA_AGUA c
-            LEFT JOIN FORNECEDOR fr ON fr.id = c.fornecedor_id
+            LEFT JOIN FORNECEDOR fr ON fr.pessoa_id = c.fornecedor_id
             WHERE c.id = ?
             """
                 .trimIndent()
